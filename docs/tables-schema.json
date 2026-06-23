@@ -1,0 +1,88 @@
+{
+  "baseId": "R1zknDm0WRqdKyKks0ONRg4w8BQEx5rG",
+  "baseName": "lovart慢速生图",
+  "docUrl": "https://alidocs.dingtalk.com/i/nodes/R1zknDm0WRqdKyKks0ONRg4w8BQEx5rG",
+  "tables": {
+    "生图表": {
+      "tableId": "hERWDMS",
+      "rowCount": 3,
+      "fields": [
+        { "fieldId": "01ZM8y7", "fieldName": "编号",                "type": "primaryDoc", "writable": false, "note": "自动主键，不写" },
+        { "fieldId": "DnmBokE", "fieldName": "素材图",              "type": "attachment", "writable": false, "note": "运营上传的商品素材图（只读，由运营填）" },
+        { "fieldId": "szTnEwE", "fieldName": "生成结果",            "type": "attachment", "writable": true,  "note": "回传 lovart生图 提示词生成的 10 张图" },
+        { "fieldId": "6z0bsDG", "fieldName": "生成结果（半身照）",   "type": "attachment", "writable": true,  "note": "回传 lovart生图（半身照） 提示词生成的 5 张图" },
+        { "fieldId": "d0kMhUg", "fieldName": "是否需要半身照",      "type": "singleSelect","writable": false,"note": "枚举值: 是 / 否；用于判定是否走半身照提示词" },
+        { "fieldId": "bbhOm6a", "fieldName": "款号",                "type": "text",       "writable": false, "note": "运营填写，作为商品标识 + 文件夹命名" },
+        { "fieldId": "RicGRRL", "fieldName": "状态",                "type": "text",       "writable": true,  "note": "⚠️ 当前 3 行都为空，需要确认状态枚举值（如「待处理/已完成/失败」或「未开始/进行中/已完成」）" },
+        { "fieldId": "9XK6tNl", "fieldName": "生成",                "type": "button",     "writable": false, "note": "钉钉表格的按钮字段 —— 用户期望点击后发 HTTP 请求触发本程序" }
+      ],
+      "sample": [
+        { "recordId": "7Gtfo83ZWU", "款号": "955039718012", "是否需要半身照": "否", "状态": "",   "素材图": "3.png" },
+        { "recordId": "pbtVzlZUdc", "款号": "",            "是否需要半身照": "",   "状态": "",   "素材图": "(空)" },
+        { "recordId": "tguz2mP8WZ", "款号": "955039718013", "是否需要半身照": "是", "状态": "",   "素材图": "ZZA7238 AMBX251586_008.png" }
+      ]
+    },
+    "生图提示词": {
+      "tableId": "hla8YBu",
+      "rowCount": 2,
+      "fields": [
+        { "fieldId": "zSBT5sc",  "fieldName": "序号",          "type": "number", "note": "排序用" },
+        { "fieldId": "K8j3XfP",  "fieldName": "具体拍摄要求",  "type": "text",   "note": "⚠️ 1 条记录里可能含多条提示词，用「1./2./3.」分段，每段 = 1 次 Lovart 生成（5 张）" },
+        { "fieldId": "XNg9do5",  "fieldName": "分辨率",        "type": "text",   "value": "2K" },
+        { "fieldId": "2yoWPdm",  "fieldName": "宽高比",        "type": "text",   "value": "3:4" },
+        { "fieldId": "wYvotko",  "fieldName": "图片数量",      "type": "number", "note": "理论值 = 5 × 提示词段数；用于校验" },
+        { "fieldId": "XwixyRq",  "fieldName": "核心规则描述",  "type": "text",   "note": "通用规则段落，拼接在每条提示词前面" },
+        { "fieldId": "qPAYcMw",  "fieldName": "任务类型",      "type": "text",   "note": "⚠️ 关键判定字段：值为「lovart生图」或「lovart生图（半身照）」" }
+      ],
+      "sample": [
+        {
+          "recordId": "VSyRAi8mYl",
+          "任务类型": "lovart生图",
+          "图片数量": 10,
+          "宽高比": "3:4",
+          "分辨率": "2K",
+          "具体拍摄要求_分段": [
+            "1.生成5张不同的淘宝主图姿势…要求比例3比4 需要2K高清\n处理模型只能用Nano Banana 2",
+            "2.生成5张不同的淘宝主图姿势…要求坐姿  坐在沙发上的…要求比例3比4 需要2K高清\n处理模型只能用Nano Banana 2"
+          ],
+          "note": "1 条记录含 2 段提示词 → 共 10 张图 → 写入「生成结果」字段"
+        },
+        {
+          "recordId": "JU3rUAIIRI",
+          "任务类型": "lovart生图（半身照）",
+          "图片数量": 5,
+          "宽高比": "3:4",
+          "分辨率": "2K",
+          "具体拍摄要求_分段": [
+            "1.生成5张不同的淘宝主图姿势…不要全身照  注意只要半身照…要求比例3比4 需要2K高清\n处理模型只能用Nano Banana 2"
+          ],
+          "note": "1 条记录含 1 段提示词 → 共 5 张图 → 写入「生成结果（半身照）」字段"
+        }
+      ]
+    }
+  },
+  "business_logic": {
+    "rule": "对生图表的每一行：若「是否需要半身照」=「否」→ 用 lovart生图 任务的 N 条提示词（写入「生成结果」）；若=「是」→ 同时用 lovart生图 + lovart生图（半身照） 的所有提示词（lovart生图 的图写「生成结果」，半身照的图写「生成结果（半身照）」）",
+    "row_buckets": {
+      "否_row": {
+        "prompts_used": ["lovart生图"],
+        "total_images": 10,
+        "write_target": "生成结果"
+      },
+      "是_row": {
+        "prompts_used": ["lovart生图", "lovart生图（半身照）"],
+        "total_images": 15,
+        "write_target": { "lovart生图": "生成结果", "lovart生图（半身照）": "生成结果（半身照）" }
+      }
+    },
+    "model": "Nano Banana 2",
+    "ratio": "3:4",
+    "resolution": "2K",
+    "per_prompt_image_count": 5,
+    "open_questions_for_user": [
+      "状态字段枚举值是什么？（目前 3 行都是空的，没看到现成的待处理/已完成标记）",
+      "「生成」按钮目前是否已配置动作？若没配，需要在钉钉表格里手动配置按钮 → HTTP webhook（指向本程序的 IP:端口）",
+      "Lovart 登录方式（邮箱密码 / Google / 扫码 Cookie 文件）？"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "lovart-batch-image",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LOVART 慢速自动批量生图 - 通过钉钉表格触发，Playwright 并发生成商品图",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "login": "node scripts/manual-login.js",
+    "test:e2e": "node scripts/e2e-test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "playwright": "^1.47.0"
+  }
+}
