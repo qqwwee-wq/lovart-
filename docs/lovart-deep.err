@@ -1,0 +1,54 @@
+[explore-deep] 1. 进入画布
+[explore-deep]    ✓ 关掉引导 Next
+[explore-deep] 2. 点 "Agent" 按钮（看模型选项）
+❌ elementHandle.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-state="open" aria-hidden="true" data-aria-hidden="true" class="fixed inset-0 bg-black/20 animate-dialog-overlay-in"></div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-state="open" aria-hidden="true" data-aria-hidden="true" class="fixed inset-0 bg-black/20 animate-dialog-overlay-in"></div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    55 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <div data-state="open" aria-hidden="true" data-aria-hidden="true" class="fixed inset-0 bg-black/20 animate-dialog-overlay-in"></div> intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+elementHandle.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - attempting click action[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-state="open" aria-hidden="true" data-aria-hidden="true" class="fixed inset-0 bg-black/20 animate-dialog-overlay-in"></div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible, enabled and stable[22m
+[2m      - element is visible, enabled and stable[22m
+[2m      - scrolling into view if needed[22m
+[2m      - done scrolling[22m
+[2m      - <div data-state="open" aria-hidden="true" data-aria-hidden="true" class="fixed inset-0 bg-black/20 animate-dialog-overlay-in"></div> intercepts pointer events[22m
+[2m    - retrying click action[22m
+[2m      - waiting 100ms[22m
+[2m    55 × waiting for element to be visible, enabled and stable[22m
+[2m       - element is visible, enabled and stable[22m
+[2m       - scrolling into view if needed[22m
+[2m       - done scrolling[22m
+[2m       - <div data-state="open" aria-hidden="true" data-aria-hidden="true" class="fixed inset-0 bg-black/20 animate-dialog-overlay-in"></div> intercepts pointer events[22m
+[2m     - retrying click action[22m
+[2m       - waiting 500ms[22m
+
+    at D:\Desktop\lovart慢速生图\scripts\explore-deep.js:66:20

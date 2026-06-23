@@ -1,0 +1,844 @@
+{
+  "url": "https://www.lovart.ai/canvas?projectId=od3tMRwOFW",
+  "title": "Lovart | The world's first design agent for all design purposes",
+  "visibleElements": [
+    {
+      "i": 0,
+      "tag": "INPUT",
+      "role": "",
+      "type": "text",
+      "text": "Untitled",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "w-full cursor-text overflow-hidden border-b border-dashed border-transparent overflow-ellipsis whitespace-nowrap text-lo-heading-sm font-inter font-se",
+      "rect": {
+        "x": 46,
+        "y": 13,
+        "w": 57,
+        "h": 23
+      }
+    },
+    {
+      "i": 1,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "对话",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "group lo-button inline-flex items-center justify-center font-normal transition-colors duration-150 cursor-pointer disabled:!cursor-not-allowed [&>svg]",
+      "rect": {
+        "x": 1053,
+        "y": 8,
+        "w": 70,
+        "h": 32
+      }
+    },
+    {
+      "i": 2,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-lo-bg-invert text-",
+      "rect": {
+        "x": 320,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 3,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 360,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 4,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 400,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 5,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 440,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 6,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 480,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 7,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 520,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 8,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 560,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 9,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 609,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 10,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 649,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 11,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent text-l",
+      "rect": {
+        "x": 689,
+        "y": 853,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 12,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "flex h-7 w-7 shrink-0 items-center justify-center rounded-lo-radius-8 hover:bg-lo-bg-overlay-hover active:bg-lo-bg-overlay-active",
+      "rect": {
+        "x": 14,
+        "y": 858,
+        "w": 28,
+        "h": 28
+      }
+    },
+    {
+      "i": 13,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default disabled:!cursor-not-allowed",
+      "rect": {
+        "x": 42,
+        "y": 858,
+        "w": 28,
+        "h": 28
+      }
+    },
+    {
+      "i": 14,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default disabled:!cursor-not-allowed",
+      "rect": {
+        "x": 70,
+        "y": 858,
+        "w": 28,
+        "h": 28
+      }
+    },
+    {
+      "i": 15,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default disabled:!cursor-not-allowed",
+      "rect": {
+        "x": 98,
+        "y": 858,
+        "w": 28,
+        "h": 28
+      }
+    },
+    {
+      "i": 16,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "100%",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default hover:bg-lo-bg-overlay-hover",
+      "rect": {
+        "x": 142,
+        "y": 858,
+        "w": 48,
+        "h": 28
+      }
+    },
+    {
+      "i": 17,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "Move focus to canvas",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "tlui-button tlui-button__low tl-skip-to-main-content",
+      "rect": {
+        "x": -9999,
+        "y": 48,
+        "w": 156,
+        "h": 40
+      }
+    },
+    {
+      "i": 18,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default hover:bg-lo-bg-overlay-hover",
+      "rect": {
+        "x": 1326,
+        "y": 11,
+        "w": 26,
+        "h": 26
+      }
+    },
+    {
+      "i": 19,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "inline-flex shrink-0 items-center justify-center self-stretch transition-colors duration-150 rounded-lo-radius-8 h-[26px] w-3.5 text-lo-icon-disabled ",
+      "rect": {
+        "x": 1352,
+        "y": 11,
+        "w": 14,
+        "h": 26
+      }
+    },
+    {
+      "i": 20,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default hover:bg-lo-bg-overlay-hover",
+      "rect": {
+        "x": 1372,
+        "y": 11,
+        "w": 26,
+        "h": 26
+      }
+    },
+    {
+      "i": 21,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-button-icon inline-flex items-center justify-center transition-colors duration-150 cursor-pointer text-lo-icon-default hover:bg-lo-bg-overlay-hover",
+      "rect": {
+        "x": 1404,
+        "y": 11,
+        "w": 26,
+        "h": 26
+      }
+    },
+    {
+      "i": 22,
+      "tag": "DIV",
+      "role": "textbox",
+      "type": "",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "relative z-1 min-h-full w-full cursor-text px-1",
+      "rect": {
+        "x": 1058,
+        "y": 781,
+        "w": 365,
+        "h": 25
+      }
+    },
+    {
+      "i": 23,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent hover:",
+      "rect": {
+        "x": 1058,
+        "y": 851,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 24,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "Agent",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-popover-trigger inline-flex h-8 items-center justify-center rounded-lo-radius-8 transition-colors duration-150 cursor-pointer hover:bg-lo-bg-overla",
+      "rect": {
+        "x": 1094,
+        "y": 851,
+        "w": 102,
+        "h": 32
+      }
+    },
+    {
+      "i": 25,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "lo-icon-button inline-flex items-center justify-center transition-colors duration-150 cursor-pointer disabled:cursor-not-allowed bg-transparent hover:",
+      "rect": {
+        "x": 1351,
+        "y": 851,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 26,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "h-8 min-w-8 rounded-full flex items-center justify-center enabled:cursor-pointer disabled:cursor-not-allowed bg-lo-bg-invert enabled:hover:bg-lo-bg-in",
+      "rect": {
+        "x": 1391,
+        "y": 851,
+        "w": 32,
+        "h": 32
+      }
+    },
+    {
+      "i": 27,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "submit",
+      "text": "Next",
+      "placeholder": "",
+      "accept": "",
+      "aria": "",
+      "href": "",
+      "classes": "group lo-button inline-flex items-center justify-center font-normal transition-colors duration-150 cursor-pointer disabled:!cursor-not-allowed bg-lo-b",
+      "rect": {
+        "x": 822,
+        "y": 610,
+        "w": 81,
+        "h": 36
+      }
+    },
+    {
+      "i": 28,
+      "tag": "BUTTON",
+      "role": "",
+      "type": "button",
+      "text": "",
+      "placeholder": "",
+      "accept": "",
+      "aria": "Close",
+      "href": "",
+      "classes": "absolute right-[15px] top-[15px] flex size-4 items-center justify-center text-lo-icon-default cursor-pointer transition-colors",
+      "rect": {
+        "x": 896,
+        "y": 250,
+        "w": 16,
+        "h": 16
+      }
+    }
+  ],
+  "keywordHits": [
+    {
+      "kw": "对话",
+      "tag": "HTML",
+      "text": "0\n对话\n100%\n输入你的想法开始创作，\n或按\nC\n开始对话\nMove focus to canvas\n\n\n\n\nStart with an idea, or ",
+      "classes": ""
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "0\n对话\n100%\n输入你的想法开始创作，\n或按\nC\n开始对话\nMove focus to canvas\n\n\n\n\nStart with an idea, or ",
+      "classes": "flex h-screen w-screen flex-col bg-lo-bg-canvas"
+    },
+    {
+      "kw": "对话",
+      "tag": "MAIN",
+      "text": "0\n对话\n100%\n输入你的想法开始创作，\n或按\nC\n开始对话\nMove focus to canvas",
+      "classes": "relative flex h-full min-w-0 flex-1 flex-col items-center justify-center"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "0\n对话\n100%\n输入你的想法开始创作，\n或按\nC\n开始对话\nMove focus to canvas",
+      "classes": "relative flex h-full min-h-0 w-full min-w-0 flex-1 flex-col"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "0\n对话",
+      "classes": "pointer-events-auto fixed top-1 z-50 inline-flex h-10 items-center gap-[6px] rounded-[14px] bg-lo-bg-canvas pl-2 py-1 pr"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "0\n对话",
+      "classes": "pointer-events-auto"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "0\n对话",
+      "classes": "user-profile-button-wrapper"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "0\n对话",
+      "classes": "flex items-center"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "对话",
+      "classes": "shrink-0 overflow-hidden"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "对话",
+      "classes": "inline-flex items-center"
+    },
+    {
+      "kw": "对话",
+      "tag": "BUTTON",
+      "text": "对话",
+      "classes": "group lo-button inline-flex items-center justify-center font-normal transition-colors duration-150 cursor-pointer disabl"
+    },
+    {
+      "kw": "对话",
+      "tag": "SPAN",
+      "text": "对话",
+      "classes": "whitespace-nowrap px-1"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "输入你的想法开始创作，\n或按\nC\n开始对话",
+      "classes": "pointer-events-none fixed bottom-0 z-20 flex items-center justify-center"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "输入你的想法开始创作，\n或按\nC\n开始对话",
+      "classes": "flex flex-wrap justify-center items-center gap-1 text-center"
+    },
+    {
+      "kw": "对话",
+      "tag": "SPAN",
+      "text": "开始对话",
+      "classes": "text-base font-normal text-lo-text-tertiary"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "Start with an idea, or type \"@\" to mention\nAgent\n将文件拖拽至此处添加到对话",
+      "classes": "right-panel-wrapper relative z-[100] h-full flex-shrink-0"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "Start with an idea, or type \"@\" to mention\nAgent\n将文件拖拽至此处添加到对话",
+      "classes": "right-panel font-inter pointer-events-auto relative h-full"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "Start with an idea, or type \"@\" to mention\nAgent\n将文件拖拽至此处添加到对话",
+      "classes": "relative z-[100] h-full overflow-hidden pointer-events-auto"
+    },
+    {
+      "kw": "对话",
+      "tag": "ASIDE",
+      "text": "Start with an idea, or type \"@\" to mention\nAgent\n将文件拖拽至此处添加到对话",
+      "classes": "border-lo-border-neutral-l1 bg-lo-bg-body h-full border-l border-solid"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "Start with an idea, or type \"@\" to mention\nAgent\n将文件拖拽至此处添加到对话",
+      "classes": "agent-chat-history-container flex flex-shrink-0 flex-col self-start relative h-full w-full overflow-hidden empty:hidden "
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "Start with an idea, or type \"@\" to mention\nAgent\n将文件拖拽至此处添加到对话",
+      "classes": "drop-zone-container relative h-full w-full"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "将文件拖拽至此处添加到对话",
+      "classes": "drop-zone-position pointer-events-none absolute top-0 right-0 bottom-0 left-0 z-20 flex flex-col justify-end p-2"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "将文件拖拽至此处添加到对话",
+      "classes": "drop-zone flex flex-col items-center justify-center gap-1 border border-dashed border-[#00A8B7] shadow-[0px_4px_40px_rgb"
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "将文件拖拽至此处添加到对话",
+      "classes": ""
+    },
+    {
+      "kw": "对话",
+      "tag": "DIV",
+      "text": "将文件拖拽至此处添加到对话",
+      "classes": "font-outfit h-5 w-[206px] text-base leading-5 font-normal whitespace-nowrap text-[#00A8B7]"
+    }
+  ],
+  "apiCalls": [
+    {
+      "method": "POST",
+      "url": "https://sentry.lovart.vip/api/2/envelope/?sentry_version=7&sentry_key=d52916143a0e6b218e67ef95fab96de6&sentry_client=sentry.javascript.react%2F9.47.1"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/time/utc/timestamp?_t=1782206686074"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/user/getUserInfo?platform=lovart"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/canva/project/saveProject"
+    },
+    {
+      "method": "POST",
+      "url": "https://sentry.lovart.vip/api/2/envelope/?sentry_version=7&sentry_key=d52916143a0e6b218e67ef95fab96de6&sentry_client=sentry.javascript.react%2F9.47.1"
+    },
+    {
+      "method": "POST",
+      "url": "https://sentry.lovart.vip/api/2/envelope/?sentry_version=7&sentry_key=d52916143a0e6b218e67ef95fab96de6&sentry_client=sentry.javascript.react%2F9.47.1"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/canva/project/queryProject"
+    },
+    {
+      "respUrl": "https://www.lovart.ai/api/canva/project/saveProject",
+      "status": 200,
+      "body": "{\"code\":0,\"msg\":null,\"data\":{\"projectId\":\"od3tMRwOFW\",\"newCreated\":true,\"validProjectId\":null,\"version\":\"1782206685000\"}}"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "respUrl": "https://www.lovart.ai/api/canva/project/queryProject",
+      "status": 200,
+      "body": "{\"code\":0,\"msg\":null,\"data\":{\"assetMeta\":{\"assetId\":\"od3tMRwOFW\",\"projectId\":\"od3tMRwOFW\",\"name\":\"Untitled\",\"projectType\":6,\"contentType\":\"PROJECT_LOVART_V2\",\"ownerType\":\"USER\",\"ownerId\":\"e40fe1dddbe647ebac08fba8e80f1b65\",\"extra\":null,\"meta\":null,\"effectivePermission\":\"OWNER\",\"copyTaskStatus\":null,\"visibility\":\"PRIVATE\",\"createTime\":\"2026-06-23T09:24:45\",\"updateTime\":\"2026-06-23T09:24:45\"},\"userId\":12181969,\"projectName\":\"Untitled\",\"projectId\":null,\"canvas\":\"\",\"validProjectId\":true,\"projectType\":6,\"version\":\"1782206685000\",\"snapshotId\":null,\"itemId\":null,\"permission\":\"OWNER\"}}"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/banner/community/getBanner"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/lovart/dialog/all/touch"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/member/packages?packageType=TRAIN&libId=0&language=zh"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/landing-activities/getById?id=46"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/landing-activities/getById?id=52"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/landing-activities/getById?id=77"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/landing-activities/getById?id=78"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/lovart/teams/sku/queryTeamSku"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/canva/agent-cashier/pricing/timeVariantConfig"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/lovart/teams/queryCurrentAccount"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/lovart/teams/queryUserTeam"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/member/free/power"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/banner/community/getBanner"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/login/query/user/info"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/member/account"
+    },
+    {
+      "method": "HEAD",
+      "url": "https://www.lovart.ai/api/www/user/location"
+    },
+    {
+      "method": "HEAD",
+      "url": "https://api.lovart.ai/api/www/user/location"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/canva/agent-cashier/device/info"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/canva/agent-cashier/task/query/fast/unlimited"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/canva/agent-cashier/task/query/unlimited"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/login/query/user/info"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "method": "GET",
+      "url": "https://www.lovart.ai/api/www/lovart/member/account"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/lovart/teams/queryCurrentAccount"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/www/log/acceptor/f"
+    },
+    {
+      "method": "POST",
+      "url": "https://www.lovart.ai/api/canva/agent/genShareCode"
+    }
+  ]
+}

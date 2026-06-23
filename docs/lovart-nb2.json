@@ -1,0 +1,69 @@
+{
+  "homeHits": [
+    {
+      "tag": "DIV",
+      "text": "让设计更简单\n懂你的设计代理，帮你搞定一切\n\n\n\n\n让 Lovart 创建一个温馨的咖啡厅\nGPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "flex w-full flex-col items-center gap-6 pt-20"
+    },
+    {
+      "tag": "DIV",
+      "text": "让 Lovart 创建一个温馨的咖啡厅\nGPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "w-full max-w-[730px]"
+    },
+    {
+      "tag": "DIV",
+      "text": "GPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "relative z-10 mt-6 min-h-19 w-full text-[12px] text-[#141414]"
+    },
+    {
+      "tag": "DIV",
+      "text": "GPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "absolute top-0 left-0 z-1 flex w-full flex-wrap items-center justify-center gap-3 transition-transfo"
+    },
+    {
+      "tag": "DIV",
+      "text": "Nano Banana Pro",
+      "classes": "flex h-8 cursor-pointer items-center gap-1 rounded-full border-[0.5px] border-solid border-[#C4C4C4]"
+    },
+    {
+      "tag": "SPAN",
+      "text": "Nano Banana Pro",
+      "classes": "whitespace-nowrap"
+    }
+  ],
+  "homeHits2": [
+    {
+      "tag": "DIV",
+      "text": "让设计更简单\n懂你的设计代理，帮你搞定一切\n\n\n\n\n让 Lovart 设计一张美丽的婚礼海报\nGPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "flex w-full flex-col items-center gap-6 pt-20"
+    },
+    {
+      "tag": "DIV",
+      "text": "让 Lovart 设计一张美丽的婚礼海报\nGPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "w-full max-w-[730px]"
+    },
+    {
+      "tag": "DIV",
+      "text": "GPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "relative z-10 mt-6 min-h-19 w-full text-[12px] text-[#141414]"
+    },
+    {
+      "tag": "DIV",
+      "text": "GPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "absolute top-0 left-0 z-1 flex w-full flex-wrap items-center justify-center gap-3 transition-transfo"
+    },
+    {
+      "tag": "DIV",
+      "text": "Nano Banana Pro",
+      "classes": "flex h-8 cursor-pointer items-center gap-1 rounded-full border-[0.5px] border-solid border-[#C4C4C4]"
+    },
+    {
+      "tag": "SPAN",
+      "text": "Nano Banana Pro",
+      "classes": "whitespace-nowrap"
+    }
+  ],
+  "canvasHits": [],
+  "canvasAfterDialogHits": [],
+  "canvasAfterAgentHits": []
+}

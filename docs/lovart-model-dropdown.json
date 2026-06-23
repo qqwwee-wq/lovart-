@@ -1,0 +1,404 @@
+{
+  "modelElements": [
+    {
+      "tag": "DIV",
+      "text": "让设计更简单\n懂你的设计代理，帮你搞定一切\n\n\n\n\n让 Lovart 设计一张美丽的婚礼海报\nGPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "flex w-full flex-col items-center gap-6 pt-20",
+      "rect": {
+        "x": 120,
+        "y": 188,
+        "w": 1260,
+        "h": 408
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "让 Lovart 设计一张美丽的婚礼海报\nGPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "w-full max-w-[730px]",
+      "rect": {
+        "x": 385,
+        "y": 374,
+        "w": 730,
+        "h": 222
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "GPT Image 2\nGPT Image 2\nSeedance 2.0\nNano Banana Pro\nDesign\nBranding\nE-Commerce\nVideo",
+      "classes": "relative z-10 mt-6 min-h-19 w-full text-[12px] text-[#141414]",
+      "rect": {
+        "x": 385,
+        "y": 520,
+        "w": 730,
+        "h": 76
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "GPT Image 2",
+      "classes": "relative whitespace-nowrap",
+      "rect": {
+        "x": 432,
+        "y": 526,
+        "w": 73,
+        "h": 19
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "GPT Image 2",
+      "classes": "preset-chip-text-shimmer pointer-events-none absolute inset-0 flex items-center gap-1 px-2",
+      "rect": {
+        "x": 406,
+        "y": 521,
+        "w": 107,
+        "h": 30
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "GPT Image 2",
+      "classes": "whitespace-nowrap",
+      "rect": {
+        "x": 432,
+        "y": 526,
+        "w": 73,
+        "h": 19
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Seedance 2.0",
+      "classes": "flex h-8 cursor-pointer items-center gap-1 rounded-full border-[0.5px] border-solid border-[#C4C4C4] px-2 home-link",
+      "rect": {
+        "x": 526,
+        "y": 520,
+        "w": 114,
+        "h": 32
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "Seedance 2.0",
+      "classes": "whitespace-nowrap",
+      "rect": {
+        "x": 553,
+        "y": 526,
+        "w": 78,
+        "h": 19
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Nano Banana Pro",
+      "classes": "flex h-8 cursor-pointer items-center gap-1 rounded-full border-[0.5px] border-solid border-[#C4C4C4] px-2 home-link",
+      "rect": {
+        "x": 652,
+        "y": 520,
+        "w": 134,
+        "h": 32
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "Nano Banana Pro",
+      "classes": "whitespace-nowrap",
+      "rect": {
+        "x": 679,
+        "y": 526,
+        "w": 98,
+        "h": 19
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design",
+      "classes": "flex h-8 cursor-pointer items-center gap-1 rounded-full border-[0.5px] border-solid border-[#C4C4C4] px-2 home-link",
+      "rect": {
+        "x": 798,
+        "y": 520,
+        "w": 75,
+        "h": 32
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "Design",
+      "classes": "whitespace-nowrap",
+      "rect": {
+        "x": 825,
+        "y": 526,
+        "w": 39,
+        "h": 19
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Ethereal: A Wedding Design Study\nJMiller\n1167\n58",
+      "classes": "",
+      "rect": {
+        "x": 1074,
+        "y": 2327,
+        "w": 306,
+        "h": 444
+      },
+      "role": "gridcell",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Ethereal: A Wedding Design Study\nJMiller\n1167\n58",
+      "classes": "",
+      "rect": {
+        "x": 1074,
+        "y": 2327,
+        "w": 306,
+        "h": 444
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Ethereal: A Wedding Design Study\nJMiller\n1167\n58",
+      "classes": "w-full",
+      "rect": {
+        "x": 1074,
+        "y": 2327,
+        "w": 306,
+        "h": 444
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Ethereal: A Wedding Design Study",
+      "classes": "group relative cursor-pointer",
+      "rect": {
+        "x": 1074,
+        "y": 2327,
+        "w": 306,
+        "h": 408
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Ethereal: A Wedding Design Study",
+      "classes": "group relative overflow-hidden rounded-[8px]",
+      "rect": {
+        "x": 1074,
+        "y": 2327,
+        "w": 306,
+        "h": 408
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Ethereal: A Wedding Design Study",
+      "classes": "absolute bottom-0 left-0 flex w-full flex-col justify-start transition-all duration-300 translate-y-full",
+      "rect": {
+        "x": 1074,
+        "y": 2735,
+        "w": 306,
+        "h": 46
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "Ethereal: A Wedding Design Study",
+      "classes": "truncate p-3 text-[14px] text-nowrap text-white",
+      "rect": {
+        "x": 1074,
+        "y": 2735,
+        "w": 306,
+        "h": 46
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design Framework for Beauty Brands\nBeizii\n2996\n96",
+      "classes": "",
+      "rect": {
+        "x": 438,
+        "y": 1729,
+        "w": 306,
+        "h": 444
+      },
+      "role": "gridcell",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design Framework for Beauty Brands\nBeizii\n2996\n96",
+      "classes": "",
+      "rect": {
+        "x": 438,
+        "y": 1729,
+        "w": 306,
+        "h": 444
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design Framework for Beauty Brands\nBeizii\n2996\n96",
+      "classes": "w-full",
+      "rect": {
+        "x": 438,
+        "y": 1729,
+        "w": 306,
+        "h": 444
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design Framework for Beauty Brands",
+      "classes": "group relative cursor-pointer",
+      "rect": {
+        "x": 438,
+        "y": 1729,
+        "w": 306,
+        "h": 408
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design Framework for Beauty Brands",
+      "classes": "group relative overflow-hidden rounded-[8px]",
+      "rect": {
+        "x": 438,
+        "y": 1729,
+        "w": 306,
+        "h": 408
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "Design Framework for Beauty Brands",
+      "classes": "absolute bottom-0 left-0 flex w-full flex-col justify-start transition-all duration-300 translate-y-full",
+      "rect": {
+        "x": 438,
+        "y": 2137,
+        "w": 306,
+        "h": 46
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "SPAN",
+      "text": "Design Framework for Beauty Brands",
+      "classes": "truncate p-3 text-[14px] text-nowrap text-white",
+      "rect": {
+        "x": 438,
+        "y": 2137,
+        "w": 306,
+        "h": 46
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "4-Language Amazon Design: Digital Product\nRainySunday22\n14190\n359",
+      "classes": "",
+      "rect": {
+        "x": 756,
+        "y": 1421,
+        "w": 306,
+        "h": 580
+      },
+      "role": "gridcell",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "4-Language Amazon Design: Digital Product\nRainySunday22\n14190\n359",
+      "classes": "",
+      "rect": {
+        "x": 756,
+        "y": 1421,
+        "w": 306,
+        "h": 580
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "4-Language Amazon Design: Digital Product\nRainySunday22\n14190\n359",
+      "classes": "w-full",
+      "rect": {
+        "x": 756,
+        "y": 1421,
+        "w": 306,
+        "h": 580
+      },
+      "role": "",
+      "aria": ""
+    },
+    {
+      "tag": "DIV",
+      "text": "4-Language Amazon Design: Digital Product",
+      "classes": "group relative cursor-pointer",
+      "rect": {
+        "x": 756,
+        "y": 1421,
+        "w": 306,
+        "h": 544
+      },
+      "role": "",
+      "aria": ""
+    }
+  ],
+  "dialogContent": [
+    {
+      "i": 0,
+      "tag": "DIV",
+      "role": "listbox",
+      "dataState": "",
+      "text": "",
+      "classes": ""
+    }
+  ]
+}

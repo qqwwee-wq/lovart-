@@ -1,38 +1,62 @@
-// src/lovart/selectors.js —— Lovart 页面的关键选择器
-// ⚠️ 这些选择器是基于公开页面的，需要登录后用 MCP 探索确认/修正
+// src/lovart/selectors.js —— Lovart 画布的 chat-style UI 选择器
 //
-// 探索流程（执行 npm run login 后用 MCP 走一遍）：
-//   1. 进入 https://www.lovart.ai/zh/home 登录后页面
-//   2. 点击 "新对话" / "创建项目" → 拿到 新建项目 按钮、模型选择器
-//   3. 上传参考图 → 拿到 file input 选择器
-//   4. 在 prompt 输入框输入 → 拿到 textarea/contenteditable 选择器
-//   5. 设置 ratio (3:4) + 2K + 模型 Nano Banana 2 → 拿到对应控件
-//   6. 点生成 → 拿到生成按钮 + 进度/结果区域选择器
-//   7. 等完成 → 拿到下载按钮选择器（或读 <img src>）
-//
-// 本文件每个选择器都留 TODO，等你登录后我们一起填。
+// 实测发现（Lovart 2026-06）：
+// - 画布 URL 形如 https://www.lovart.ai/canvas?projectId=<id>
+// - 主页"新建项目"链接指向 /canvas?newProject=true（创建后会被 302 到带 projectId 的 URL）
+// - 画布是 chat-style：右下角 contenteditable 输入框 + 旁边 "Agent" 发送按钮
+// - 模型在 UI 上不可单独选择（"Nano Banana 2"/"Pro" 是后端别名，通过 prompt 文本指定）
+// - 参考图通过画布中央的拖拽区（"将文件拖拽至此处添加到对话"）上传
+// - 生成结果图片直接出现在画布上
 'use strict';
 
 module.exports = {
+  // 项目入口
   home: {
-    // 登录后首页的根容器 / 主要导航
-    appRoot: 'main',
-    newProjectButton: null, // TODO: "新对话"/"创建项目"
+    newProjectLink: 'a[href*="/canvas?newProject=true"]', // 左侧第一个 + 图标
   },
-  project: {
-    // 项目内（生成画布）相关
-    fileInput: 'input[type="file"]', // 通常 upload 控件都是这个，备用
-    uploadButton: null, // TODO
-    promptInput: null, // TODO: prompt 输入框 (textarea / contenteditable)
-    modelSelect: null, // TODO: "Select model" 按钮
-    modelOptionNanoBanana2: null, // TODO
-    ratioSelect: null, // TODO: 比例选择
-    ratioOption3x4: null, // TODO
-    resolutionSelect: null, // TODO: 分辨率/画质选择
-    resolutionOption2K: null, // TODO
-    generateButton: null, // TODO: 提交生成
-    generatingIndicator: null, // TODO: 生成中的 loading/进度
-    resultImages: null, // TODO: 完成后 5 张 img 的容器选择器
-    downloadButton: null, // TODO: 单张/批量下载
+
+  // 画布 URL 模板：访问 /canvas?newProject=true 会自动建项目并跳转
+  canvas: {
+    newProjectUrl: 'https://www.lovart.ai/canvas?newProject=true',
+    projectIdParam: 'projectId',
+  },
+
+  // 输入区（右下角）
+  input: {
+    // contenteditable DIV（不是 textarea）
+    textbox: '[role="textbox"]',
+    // 备选
+    textboxAlt: 'div[contenteditable="true"]',
+  },
+
+  // 发送按钮（"Agent" 按钮在输入框右侧）
+  send: {
+    agentButton: 'button:has-text("Agent")',
+    sendButtonByClass: null, // 待补：实际可能是个图标按钮
+  },
+
+  // 参考图上传（拖拽区）
+  upload: {
+    // 画布中央的拖拽提示 "将文件拖拽至此处添加到对话"
+    dropZoneText: '将文件拖拽至此处添加到对话',
+    // file input 通常是隐藏的
+    fileInput: 'input[type="file"]',
+    // 备选：拖拽目标区域
+    dropTarget: 'div:has-text("将文件拖拽至此处添加到对话")',
+  },
+
+  // 等待/状态
+  status: {
+    // 生成中的 loading 指示器（待补：实际可能是 "正在分析" 等文本）
+    generatingText: '正在分析用户意图',
+    generatingTextAlt: '正在搜索高质量参考',
+    // 完成后结果图片（在画布上的 <img>，属于本次生成的）
+    resultImages: 'img[src*="lovart.ai/artifacts/user"]',
+  },
+
+  // 对话/项目设置（顶部右侧"对话"按钮，可能含模型选择）
+  // 实测发现"对话"按钮在 (1053, 8)，但点击后没有 nano banana 2 显式选项
+  settings: {
+    dialogButton: 'button:has-text("对话")',
   },
 };
