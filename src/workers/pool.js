@@ -22,18 +22,26 @@ class WorkerPool {
     this._drainResolver = null;
   }
 
-  /** 把新一批任务塞入队列；如果 pool 还没启动，会自动启动 */
+  /**
+   * 把新一批任务塞入队列
+   * 只启动 min(workerCount, tasks.length) 个 worker（避免一次性开太多浏览器）
+   */
   enqueue(tasks) {
     if (!tasks || tasks.length === 0) return;
     log.info(`enqueue ${tasks.length} tasks`, { running: this.workers.length });
     this.queue.push(tasks);
-    if (this.workers.length === 0) this._start();
-    else this._wakeWorkers();
+    if (this.workers.length === 0) {
+      // 只启动足够数量的 worker（避免为单行任务开 5 个 browser）
+      const toStart = Math.min(this.workerCount, tasks.length);
+      this._start(toStart);
+    } else {
+      this._wakeWorkers();
+    }
   }
 
-  _start() {
-    log.info(`启动 ${this.workerCount} 个 worker`);
-    for (let i = 1; i <= this.workerCount; i++) {
+  _start(n) {
+    log.info(`启动 ${n} 个 worker（max=${this.workerCount}）`);
+    for (let i = 1; i <= n; i++) {
       const label = `W${i}`;
       const w = this._runWorker(label).catch((e) => {
         log.error(`worker ${label} 异常退出`, { err: e.message });

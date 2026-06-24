@@ -35,13 +35,15 @@ app.get('/status', authMiddleware, (_req, res) => {
 });
 
 // 真正的端点：钉钉按钮调这里
+// 支持两种调用方式：
+//   POST /run                 → 处理所有「待处理」行（批跑）
+//   POST /run {recordId:"xxx"} → 只处理指定行（按钮单行触发）
 app.post('/run', authMiddleware, async (req, res) => {
   const trigger = req.body?.trigger || 'http';
-  log.info('收到 /run 触发', { trigger, body: req.body });
-  // 异步响应：先 200，再后台跑（避免钉钉按钮超时）
-  res.json({ accepted: true, trigger });
-  // 不 await，让 HTTP 立即返回
-  runOnce({ trigger }).catch((e) => log.error('runOnce 异常', { err: e.message }));
+  const recordId = req.body?.recordId;
+  log.info('收到 /run 触发', { trigger, recordId, body: req.body });
+  res.json({ accepted: true, trigger, recordId: recordId || 'all' });
+  runOnce({ trigger, recordId }).catch((e) => log.error('runOnce 异常', { err: e.message }));
 });
 
 app.post('/run-dry', authMiddleware, async (req, res) => {

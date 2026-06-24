@@ -17,15 +17,20 @@ function getPool() {
   return _pool;
 }
 
-/** 主入口：拉数据 → 拼任务 → 入队 */
-async function runOnce({ trigger = 'manual' } = {}) {
+/**
+ * 主入口：拉数据 → 拼任务 → 入队
+ * @param {object} opts
+ * @param {string} [opts.trigger='manual']
+ * @param {string} [opts.recordId] 指定只跑某一行
+ */
+async function runOnce({ trigger = 'manual', recordId = null } = {}) {
   if (_runningRunId) {
     log.warn(`已有运行中的批次 ${_runningRunId}，拒绝新触发`);
     return { runId: _runningRunId, skipped: true };
   }
   const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   _runningRunId = runId;
-  log.info(`[${runId}] 开始批次 (trigger=${trigger})`);
+  log.info(`[${runId}] 开始批次 (trigger=${trigger} recordId=${recordId || 'ALL'})`);
 
   try {
     // 1) 拉数据
@@ -35,12 +40,19 @@ async function runOnce({ trigger = 'manual' } = {}) {
     ]);
 
     // 2) 拼任务
-    const tasks = buildTasks(
+    let tasks = buildTasks(
       productRows,
       promptRows,
       config.dingtalk.fields.product,
       config.dingtalk.fields.prompt,
     );
+
+    // 如果指定 recordId，过滤只跑这一行
+    if (recordId) {
+      tasks = tasks.filter((t) => t.recordId === recordId);
+      log.info(`[${runId}] 指定 recordId=${recordId}，过滤后 ${tasks.length} 个任务`);
+    }
+
     log.info(`[${runId}] 拼出 ${tasks.length} 个可执行任务`);
 
     if (tasks.length === 0) {

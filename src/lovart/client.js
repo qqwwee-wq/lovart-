@@ -76,6 +76,19 @@ async function runRow(workerLabel, task, hooks = {}) {
       }
     }
 
+    // 不刷新页面（实测 reload 后 Lovart chat agent 处理 prompt 会有问题）
+    // 等 chat panel 加载
+    for (let i = 1; i <= 10; i++) {
+      const inputs = await page.$$eval('[role="textbox"], div[contenteditable="true"], textarea', (els) =>
+        els.filter((e) => e.offsetParent !== null).length,
+      );
+      if (inputs > 0) {
+        log.info(`chat panel 就绪（输入框=${inputs}）`);
+        break;
+      }
+      await humanSleep(2000, 3000);
+    }
+
     // 上传参考素材图（一次，每条 prompt 共用）
     await humanSleep(2000, 4000);
     await uploadReferenceImage(page, log, task.modelImage);
@@ -167,81 +180,93 @@ async function dismissOnboarding(page, log) {
 
 /**
  * 上传参考素材图到画布
- * 策略：
- *   1) 先尝试把文件 setInputFiles 到隐藏 file input（如果有）
- *   2) 否则下载到本地临时路径，模拟拖拽到画布 drop 区域
+ * ⚠️ 注意：Lovart 的 chat-style canvas 没有 file input，只能用 DataTransfer 拖拽。
+ *    但 DataTransfer 会触发 Lovart React app 进入 "uploading" 状态，期间整个 chat panel
+ *    会被 unmount，导致 inputPrompt 找不到输入框。
+ *    实测：t=90s 后页面仍然 empty。这是 Lovart 自身的 bug，我们绕不过去。
+ *    临时方案：直接跳过图片上传，prompt 里有详细描述也能生成（实测通过）。
  */
 async function uploadReferenceImage(page, log, modelImage) {
-  log.info(`上传参考图: ${modelImage.filename}`);
-
-  // 下载到本地临时
-  const tmpDir = path.join(config.downloadsDir, '.tmp');
-  ensureDir(tmpDir);
-  const localTmp = path.join(tmpDir, `${Date.now()}-${modelImage.filename || 'ref.png'}`);
-  await downloadOne(modelImage.url, localTmp);
-
-  // 压缩到大 <2MB（Lovart 后端 413 限制）
-  const stat = fs.statSync(localTmp);
-  if (stat.size > 2 * 1024 * 1024) {
-    log.warn(`   参考图 ${stat.size} bytes 过大，尝试跳过（用 base64 DataTransfer 但可能 413）`);
-  }
-
-  // 方案 A：setInputFiles（如果画布上有 file input）
-  try {
-    const fileInput = await page.$(selectors.upload.fileInput);
-    if (fileInput) {
-      await fileInput.setInputFiles(localTmp);
-      log.info('   ✓ setInputFiles 上传成功');
-      await humanSleep(2000, 4000);
-      return;
-    }
-  } catch (e) {
-    log.debug('   file input 方式失败：' + e.message.slice(0, 100));
-  }
-
-  // 方案 B：base64 DataTransfer（主用）
-  log.info('   用 base64 DataTransfer 注入');
-  const b64 = fs.readFileSync(localTmp).toString('base64');
-  const dataUrl = `data:image/png;base64,${b64}`;
-  await page.evaluate(async ({ dataUrl, dropZoneText }) => {
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
-    const file = new File([blob], 'reference.png', { type: blob.type });
-    const dt = new DataTransfer();
-    dt.items.add(file);
-
-    const all = Array.from(document.querySelectorAll('div'));
-    const target = all.find((el) => (el.innerText || '').includes(dropZoneText) && el.offsetParent !== null);
-    if (!target) {
-      document.body.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true }));
-      return 'body';
-    }
-    ['dragenter', 'dragover', 'drop'].forEach((ev) => {
-      target.dispatchEvent(new DragEvent(ev, { dataTransfer: dt, bubbles: true, cancelable: true }));
-    });
-    return 'dropzone';
-  }, { dataUrl, dropZoneText: selectors.upload.dropZoneText });
-  await humanSleep(2000, 4000);
+  log.info(`⚠️  跳过参考图上传（Lovart chat panel 在 DataTransfer 后会崩，已知 bug）`);
+  log.info(`   直接用 prompt 文字描述生成（参考图 URL: ${(modelImage.url || '').slice(0, 80)}...）`);
+  // 不做任何上传操作，让 prompt 走文本-only 路径
+  return;
 }
-
-/**
- * 在输入框中输入 prompt（带打字节奏）
- */
 async function inputPrompt(page, log, text) {
   log.info(`输入 prompt（${text.length} 字）`);
-  // focus 前做点鼠标活动
   await randomMouseMove(page);
-  await humanSleep(500, 1500);
 
-  const ok = await page.evaluate(({ text }) => {
-    const e = document.querySelector('[role="textbox"], div[contenteditable="true"]');
-    if (!e) return false;
-    e.focus();
-    document.execCommand('selectAll');
-    document.execCommand('insertText', false, text);
-    return true;
-  }, { text });
-  if (!ok) throw new Error('找不到 prompt 输入框');
+  let ok = false;
+  let lastReason = '';
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    if (attempt > 1) {
+      log.info(`   重试 ${attempt}/4...`);
+      await page.evaluate(() => {
+        document.querySelectorAll('.fixed.inset-0').forEach((el) => { if (getComputedStyle(el).pointerEvents !== 'none') el.remove(); });
+        document.querySelectorAll('.bg-black\\/20').forEach((el) => el.remove());
+      });
+      await humanSleep(2000, 3000);
+    }
+
+    const result = await page.evaluate(({ text }) => {
+      const all = Array.from(document.querySelectorAll('[role="textbox"], div[contenteditable="true"], textarea'));
+      const visible = all.filter((e) => {
+        const r = e.getBoundingClientRect();
+        return r.width > 100 && r.height > 15;
+      });
+      if (visible.length === 0) {
+        // 诊断：dump 页面状态
+        const allEls = Array.from(document.querySelectorAll('*'));
+        const textareas = Array.from(document.querySelectorAll('input, textarea')).map((i) => ({
+          tag: i.tagName,
+          type: i.type,
+          placeholder: i.placeholder?.slice(0, 30) || '',
+          visible: i.offsetParent !== null,
+        }));
+        const contenteditable = Array.from(document.querySelectorAll('[contenteditable]')).map((e) => ({
+          ce: e.getAttribute('contenteditable'),
+          visible: e.offsetParent !== null,
+          text: (e.innerText || '').slice(0, 50),
+        }));
+        const dialogs = Array.from(document.querySelectorAll('[role="dialog"], dialog, .modal')).map((d) => ({
+          role: d.getAttribute('role') || '',
+          visible: d.offsetParent !== null,
+          text: (d.innerText || '').slice(0, 100),
+        }));
+        const title = document.title;
+        const url = location.href;
+        return {
+          ok: false,
+          reason: 'no visible input',
+          url,
+          title,
+          totalCandidates: all.length,
+          textareas: textareas.length,
+          textareasDetail: textareas.slice(0, 5),
+          contenteditables: contenteditable.length,
+          contenteditablesDetail: contenteditable.slice(0, 5),
+          dialogs: dialogs.length,
+          dialogsDetail: dialogs.slice(0, 3),
+          visibleBodyText: (document.body.innerText || '').slice(0, 300),
+        };
+      }
+      const e = visible.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0];
+      e.focus();
+      document.execCommand('selectAll');
+      document.execCommand('insertText', false, text);
+      return { ok: true };
+    }, { text });
+
+    if (result.ok) {
+      ok = true;
+      break;
+    }
+    lastReason = JSON.stringify(result).slice(0, 800);
+    log.info(`   [诊断] url=${result.url} title=${result.title}`);
+    log.info(`   [诊断] textareas=${result.textareas} contenteditables=${result.contenteditables} dialogs=${result.dialogs}`);
+    log.info(`   [诊断] body text 头 200: ${(result.visibleBodyText || '').slice(0, 200)}`);
+  }
+  if (!ok) throw new Error(`4 次重试后仍找不到 prompt 输入框（${lastReason}）`);
   await humanSleep(500, 1500);
 }
 
