@@ -90,6 +90,11 @@ const config = {
     dir: path.resolve(__dirname, '..', process.env.LOG_DIR || './logs'),
   },
   downloadsDir: path.resolve(__dirname, '..', 'downloads'),
+  captcha: {
+    twoCaptchaApiKey: process.env.TWO_CAPTCHA_API_KEY || '',
+    // 2Captcha API base
+    apiBase: 'https://2captcha.com',
+  },
 };
 
 module.exports = config;

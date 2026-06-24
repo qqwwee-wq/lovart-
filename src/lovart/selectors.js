@@ -31,8 +31,10 @@ module.exports = {
 
   // 发送按钮（"Agent" 按钮在输入框右侧）
   send: {
+    // 真发送按钮（Agent 是模式切换器，popover-trigger）
+    sendButton: '[data-testid="agent-send-button"]',
+    // 老 fallback
     agentButton: 'button:has-text("Agent")',
-    sendButtonByClass: null, // 待补：实际可能是个图标按钮
   },
 
   // 参考图上传（拖拽区）
