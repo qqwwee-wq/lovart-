@@ -1,74 +1,124 @@
 # LOVART 慢速自动批量生图
 
-通过钉钉表格触发，5 个 Playwright Worker 并发批量在 [lovart.ai](https://www.lovart.ai/zh/home) 生成商品图，自动回传到钉钉表格 + 本地归档。
+读取钉钉「生图表」里的待处理行，调用 [Lovart](https://www.lovart.ai) chat agent 自动生成商品图，结果回写到钉钉 + 本地归档。
 
 ## 快速开始
 
+### 1. 安装
+
 ```bash
-# 1. 安装依赖
+git clone <repo-url>
+cd lovart慢速生图
 npm install
-npx playwright install chromium
-
-# 2. 准备 .env（从 .env.example 复制并填值）
 cp .env.example .env
-
-# 3. （仅本地）保存 Lovart 登录 cookies
-npm run login
-# → 弹出浏览器 → 手动登录 → 回车 → cookies.json 写入 ./data/
-
-# 4. 启动 HTTP 服务
-npm start
-
-# 5. 验证（不真生图，只读表+拼任务）
-curl http://localhost:3000/run-dry
-
-# 6. 触发一次批跑
-curl -X POST http://localhost:3000/run
+# 填 .env 里的钉钉/Lovart 配置
 ```
 
-## 端点
+### 2. 保存 Lovart 登录态（一次性）
 
-| Method | Path | 用途 |
-|---|---|---|
-| GET | `/health` | 健康检查 |
-| GET | `/status` | pool / queue 实时状态 |
-| POST | `/run` | 触发一次批跑（钉钉按钮回调） |
-| POST | `/run-dry` | 只读表 + 拼任务，不真生成 |
+```bash
+npm run login
+# 浏览器打开 Lovart，手动登录（Google/Apple/邮箱），回车保存 cookies 到 ./data/cookies.json
+```
+
+### 3. 跑任务
+
+**一键跑所有「待处理」行：**
+```bash
+npm run run
+# 或：node scripts/run-all.js
+```
+
+**先 dry-run（不真生成，只看会跑什么）：**
+```bash
+npm run run:dry
+```
+
+**守护进程（每 5 分钟扫一次）：**
+```bash
+npm run daemon
+# 或：node scripts/daemon.js --interval=5
+```
+
+**单次跑然后退出：**
+```bash
+npm run daemon:once
+# 或：node scripts/daemon.js --once
+```
+
+**限制条数：**
+```bash
+node scripts/run-all.js --limit=5
+```
+
+### 4. 监控（可选）
+
+```bash
+npm start                 # 起 HTTP 服务
+curl http://localhost:3000/health
+curl http://localhost:3000/status   # worker 池实时状态
+```
+
+## 工作流程
+
+```
+1. 读钉钉「生图表」+「生图提示词表」
+2. 按「是否需要半身照」拼出任务
+3. CloakBrowser（隐身 Chromium）注入 cookies + 模拟真人节奏
+4. 打开 Lovart canvas → 跳过 onboarding → 输入 prompt → 发送
+5. 等 Lovart 生成 5 张图 → 下载到本地 → 上传回钉钉
+6. 更新状态：「待处理」→「处理中」→「已完成」/「失败」
+```
 
 ## 部署
 
 服务器上需要：
 - Node.js ≥ 18
-- Chromium（`npx playwright install chromium`）
+- CloakBrowser binary（首次跑 npm run run 时自动下载到 `~/.cloakbrowser/`）
 - dws CLI（用于调钉钉 Open Platform）：`brew install dws` 或手动下载 → `dws auth login --device` 完成首次扫码
 - 拷贝 `data/cookies.json`（Lovart 登录态）
 
-`.env` 里把所有真实值填上（含 `HTTP_AUTH_TOKEN`、`DINGTALK_*`、`LOVART_COOKIES_FILE`）。
+`.env` 里把所有真实值填上。
+
+**推荐进程管理（pm2 例子）：**
+```bash
+pm2 start scripts/daemon.js --name lovart-batch -- --interval=5
+pm2 save
+pm2 startup
+```
 
 ## 项目结构
 
 ```
 .
-├── .env.example          # 环境变量样例（提交到 git）
-├── package.json
+├── .env.example
+├── README.md
+├── STATUS.md             # 详细状态报告
 ├── docs/
-│   └── tables-schema.json # 钉钉表结构快照
+│   └── tables-schema.json
 ├── src/
-│   ├── config.js         # .env 加载与校验
-│   ├── logger.js         # 控制台+文件日志
+│   ├── config.js
+│   ├── logger.js
 │   ├── orchestrator.js   # 批跑编排
-│   ├── server.js         # Express HTTP 入口
-│   ├── dingtalk/         # 钉钉 dws shell-out 封装
-│   ├── lovart/           # Lovart Playwright 自动化
-│   ├── workers/          # 5 槽 worker 池 + 单行执行
-│   ├── queue/            # FIFO 任务队列
-│   └── utils/            # 通用工具（拆分、下载、重试）
+│   ├── server.js         # HTTP 监控服务
+│   ├── dingtalk/         # 钉钉表读写
+│   ├── lovart/           # Lovart 自动化
+│   │   ├── auth.js
+│   │   ├── browser.js    # CloakBrowser 启动
+│   │   ├── selectors.js
+│   │   ├── client.js
+│   │   └── captcha.js    # 2Captcha 兜底
+│   ├── workers/          # Worker 池
+│   └── utils/            # 通用工具
 ├── scripts/
-│   ├── manual-login.js   # 一次性 Lovart 登录保存 cookies
-│   └── smoke-buildtask.js # 表逻辑冒烟测试
-├── data/                 # cookies.json 等（gitignored）
-├── downloads/            # 生成的图片（gitignored）
-└── logs/                 # 运行日志（gitignored）
+│   ├── manual-login.js   # 保存 Lovart cookies
+│   ├── run-all.js        # ← CLI 一键跑
+│   ├── daemon.js         # ← 守护进程
+│   ├── e2e-test.js
+│   └── *.js              # 调试
+├── data/
+│   └── cookies.json       # Lovart 登录态
+└── downloads/             # 生成的图片
 ```
 
 ## 业务规则
@@ -82,6 +132,10 @@ curl -X POST http://localhost:3000/run
 
 ## 已知限制
 
-- 5 个 Worker 共用同一个 Lovart 账号（Lovart 是否支持并发登录待验证）
-- 选择器依赖 Lovart 前端 UI，需要登录后探索填进 `src/lovart/selectors.js`
-- 钉钉附件上传走 dws → OSS PUT，依赖 dws 凭证
+- ❌ 参考图上传暂时绕开（DataTransfer 会让 Lovart React app 崩）
+- ❌ Lovart 账号需有足够积分
+- 详见 [STATUS.md](STATUS.md)
+
+## 许可证
+
+仅供学习与个人使用。
