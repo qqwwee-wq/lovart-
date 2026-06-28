@@ -14,8 +14,9 @@ const log = makeLogger('lovart.browser');
 /**
  * 启动一个全新的 CloakBrowser（每个 worker 独立实例）
  * - 默认 headless（后台跑）
- * - 设 CLOAK_HEADLESS=false 可见浏览器窗口（看操作过程）
- * - 设 CLOAK_SLOWMO=N 慢动作 N ms（看清每一步）
+ * - 默认 slowMo=500（实测：不加会导致 Lovart 在 Get started 后变白）
+ * - 设 CLOAK_HEADLESS=false 可见浏览器窗口
+ * - 设 CLOAK_SLOWMO=N 自定义慢动作
  * @returns {Promise<Browser>}
  */
 async function launchOwnBrowser() {
@@ -23,10 +24,8 @@ async function launchOwnBrowser() {
   const opts = {
     headless: process.env.CLOAK_HEADLESS !== 'false',
     humanize: true,
+    slowMo: process.env.CLOAK_SLOWMO ? parseInt(process.env.CLOAK_SLOWMO) : 500,
   };
-  if (process.env.CLOAK_SLOWMO) {
-    opts.slowMo = parseInt(process.env.CLOAK_SLOWMO);
-  }
   return launch(opts);
 }
 
@@ -59,14 +58,9 @@ async function newContext(workerLabel) {
   log.info(`[${workerLabel}] ✓ 注入 ${filtered.length} cookies`);
 
   const page = await ctx.newPage();
-  await page.goto(config.lovart.homeUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForTimeout(2000);
-  const url = page.url();
-  if (url.includes('/login') || url.includes('/auth') || url.includes('/signin')) {
-    await browser.close();
-    throw new Error(`Lovart cookies 已失效（当前跳转到 ${url}）。请重新执行：npm run login`);
-  }
-  log.info(`[${workerLabel}] ✓ 已登录 URL=${url}`);
+  // 不在这里 goto，由 client.js 统一处理（避免双 goto 触发 Lovart 异常）
+  // 但保留 cookies 注入，cookies 注入不需要先访问 URL
+  log.info(`[${workerLabel}] ✓ BrowserContext 就绪（cookies 已注入，client.js 负责 goto）`);
 
   return { browser, ctx, page };
 }

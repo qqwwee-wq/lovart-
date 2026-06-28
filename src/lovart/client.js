@@ -23,6 +23,22 @@ const { newContext } = require('./browser');
 const selectors = require('./selectors');
 const { detectAndSolveHCaptcha } = require('./captcha');
 
+// 截图工具：visible 模式下记录每步
+const DEBUG_DIR = path.resolve(__dirname, '..', '..', 'docs', 'debug');
+try { fs.mkdirSync(DEBUG_DIR, { recursive: true }); } catch (_) {}
+let __snapIdx = 0;
+async function snap(page, label, log) {
+  try {
+    __snapIdx += 1;
+    const idx = String(__snapIdx).padStart(2, '0');
+    const f = path.join(DEBUG_DIR, `${idx}-${label}.png`);
+    await page.screenshot({ path: f });
+    if (log) log.info(`   📸 截图: ${f}`);
+  } catch (e) {
+    if (log) log.debug(`   📸 截图失败: ${e.message}`);
+  }
+}
+
 /**
  * 单行任务执行入口
  * @param {string} workerLabel
@@ -46,7 +62,7 @@ async function runRow(workerLabel, task, hooks = {}) {
       timeout: 60_000,
     });
     await humanSleep(3000, 6000); // 等页面加载
-    await randomMouseMove(page);
+    // 去掉 randomMouseMove（实测会让 Lovart 在 Get started 后变白）
 
     // 移除会拦截 pointer events 的弹窗遮罩（pointer-events:auto 的 fixed inset-0）
     await page.evaluate(() => {
@@ -55,6 +71,9 @@ async function runRow(workerLabel, task, hooks = {}) {
       });
       document.querySelectorAll('.bg-black\\/20').forEach((el) => el.remove());
     });
+
+    // 截图：clear-overlay 后
+    await snap(page, '01-after-clear-overlay', log);
 
     // dismiss onboarding（多步骤）
     await dismissOnboarding(page, log);
@@ -65,6 +84,9 @@ async function runRow(workerLabel, task, hooks = {}) {
         if (getComputedStyle(el).pointerEvents !== 'none') el.remove();
       });
     });
+
+    // 截图：dismiss 后
+    await snap(page, '02-after-dismiss', log);
 
     // 检测 hCaptcha（onboarding 后可能弹）—— 仅当用户在 .env 配了 2Captcha key
     if (config.captcha.twoCaptchaApiKey) {
@@ -78,6 +100,7 @@ async function runRow(workerLabel, task, hooks = {}) {
 
     // 不刷新页面（实测 reload 后 Lovart chat agent 处理 prompt 会有问题）
     // 等 chat panel 加载
+    await snap(page, '03-before-wait-panel', log);
     for (let i = 1; i <= 10; i++) {
       const inputs = await page.$$eval('[role="textbox"], div[contenteditable="true"], textarea', (els) =>
         els.filter((e) => e.offsetParent !== null).length,
@@ -142,17 +165,20 @@ async function runRow(workerLabel, task, hooks = {}) {
  * 每步之间 humanSleep(1-3s) 模拟真人阅读
  */
 async function dismissOnboarding(page, log) {
-  const dismissTexts = ['Next', 'Get started', 'Got it', '跳过', '知道了', '开始使用', 'Skip'];
-  for (let round = 1; round <= 8; round++) {
-    await humanSleep(1000, 3000); // 模拟阅读时间
+  // 简化为跟 test-visible-full 一样的逻辑（已实测可用）
+  const dismissTexts = ['Next', 'Get started', 'Got it', '跳过', '知道了'];
+  for (let round = 1; round <= 6; round++) {
     let clicked = false;
+    let clickedText = '';
     for (const text of dismissTexts) {
       const btns = await page.$$('button:has-text("' + text + '")');
       for (const btn of btns) {
         try {
           await btn.click({ force: true, timeout: 2000 });
           clicked = true;
-          await sleep(800);
+          clickedText = text;
+          // 等 AFTER click（keep-open 实测有效的模式）
+          await sleep(1500);
           break;
         } catch (e) {}
       }
@@ -162,15 +188,10 @@ async function dismissOnboarding(page, log) {
       await page.keyboard.press('Escape');
       await sleep(500);
     }
-    // 检查是否还有 onboarding
-    const onb = await page.evaluate(() => {
-      const kws = ['All-New Lovart', 'Membership', 'Brand', '品牌', 'onboarding', 'Getting started', '欢迎', '应用品牌套件'];
-      return Array.from(document.querySelectorAll('*'))
-        .filter((e) => e.children.length < 5 && kws.some((k) => (e.innerText || '').includes(k)))
-        .filter((e) => e.offsetParent !== null)
-        .slice(0, 3);
-    });
-    if (onb.length === 0 && round > 1) {
+    await snap(page, `dismiss-r${round}-${clickedText || 'ESC'}`, log);
+    // 必须跑满 6 轮（Next×2 + Get started + 跳过 + 2 ESC）才能关掉所有弹窗
+    if (round >= 4 && !clicked) {
+      // 已点完 Next/Get started/跳过 都没了，ESC 也按过 → 结束
       log.info('onboarding dismiss 完成（轮 ' + round + '）');
       return;
     }
