@@ -13,14 +13,21 @@ const log = makeLogger('lovart.browser');
 
 /**
  * 启动一个全新的 CloakBrowser（每个 worker 独立实例）
+ * - 默认 headless（后台跑）
+ * - 设 CLOAK_HEADLESS=false 可见浏览器窗口（看操作过程）
+ * - 设 CLOAK_SLOWMO=N 慢动作 N ms（看清每一步）
  * @returns {Promise<Browser>}
  */
 async function launchOwnBrowser() {
   const { launch } = await import('cloakbrowser');
-  return launch({
-    headless: true,
+  const opts = {
+    headless: process.env.CLOAK_HEADLESS !== 'false',
     humanize: true,
-  });
+  };
+  if (process.env.CLOAK_SLOWMO) {
+    opts.slowMo = parseInt(process.env.CLOAK_SLOWMO);
+  }
+  return launch(opts);
 }
 
 /**
