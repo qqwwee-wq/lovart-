@@ -40,102 +40,85 @@ async function snap(page, label, log) {
 }
 
 /**
- * 单行任务执行入口
+ * 单行任务执行入口（改用 keep-open 验证过的同款流程）
+ * keep-open.js 持续跑通，client.js 包装后失败 —— 本函数完全镜像 keep-open 的成功模式
  * @param {string} workerLabel
  * @param {object} task {recordId, styleNo, modelImage, prompts:[{taskType,text,folder,writeField}]}
  * @param {object} hooks {onPromptDone(prompt, localFiles)}
  */
 async function runRow(workerLabel, task, hooks = {}) {
   const log = makeLogger(`lovart.client.${workerLabel}`);
-  log.info(`开始 recordId=${task.recordId} 款号=${task.styleNo} 提示词=${task.prompts.length}`);
+  log.info(`▶ 开始 recordId=${task.recordId} 款号=${task.styleNo} 提示词=${task.prompts.length}`);
 
-  const { ctx, page } = await newContext(workerLabel);
+  const { browser, ctx, page } = await newContext(workerLabel);
 
   // 用于记录每条 prompt 之前画布上已有的 img 数（用于"增量"判定新生成的图）
   let prevImgCount = 0;
   const results = [];
 
   try {
-    log.info('打开新建项目画布');
+    // 1. 打开画布（keep-open 模式：直接 goto newProjectUrl）
+    log.info('打开 Lovart canvas');
     await page.goto(selectors.canvas.newProjectUrl, {
       waitUntil: 'domcontentloaded',
       timeout: 60_000,
     });
-    await humanSleep(3000, 6000); // 等页面加载
-    // 去掉 randomMouseMove（实测会让 Lovart 在 Get started 后变白）
+    // 关键时序：keep-open 用 humanSleep 5000-7000ms（比之前 3000-6000 更长）
+    await humanSleep(5000, 7000);
+    await snap(page, '01-loaded', log);
 
-    // 移除会拦截 pointer events 的弹窗遮罩（pointer-events:auto 的 fixed inset-0）
-    await page.evaluate(() => {
-      document.querySelectorAll('.fixed.inset-0').forEach((el) => {
-        if (getComputedStyle(el).pointerEvents !== 'none') el.remove();
-      });
-      document.querySelectorAll('.bg-black\\/20').forEach((el) => el.remove());
-    });
-
-    // 截图：clear-overlay 后
-    await snap(page, '01-after-clear-overlay', log);
-
-    // dismiss onboarding（多步骤）
-    await dismissOnboarding(page, log);
-
-    // 移除弹窗后再次清遮罩
-    await page.evaluate(() => {
-      document.querySelectorAll('.fixed.inset-0').forEach((el) => {
-        if (getComputedStyle(el).pointerEvents !== 'none') el.remove();
-      });
-    });
-
-    // 截图：dismiss 后
-    await snap(page, '02-after-dismiss', log);
-
-    // 检测 hCaptcha（onboarding 后可能弹）—— 仅当用户在 .env 配了 2Captcha key
-    if (config.captcha.twoCaptchaApiKey) {
-      try {
-        const solved = await detectAndSolveHCaptcha(page);
-        if (solved) log.info('✓ onboarding 后解了 hCaptcha');
-      } catch (e) {
-        log.warn('onboarding 后 captcha 检测: ' + e.message);
+    // 2. dismiss onboarding（跟 keep-open 一样用 page.$ 单个按钮 + sleep 1500）
+    log.info('Dismiss onboarding（keep-open 模式）');
+    for (const text of ['Next', 'Get started', '跳过', '知道了']) {
+      const btn = await page.$(`button:has-text("${text}")`);
+      if (btn) {
+        log.info(`   点 "${text}"`);
+        await btn.click({ force: true });
+        await sleep(1500);
       }
     }
+    // ESC 兜底（跟 keep-open 一样）
+    await page.keyboard.press('Escape');
+    await sleep(500);
+    await page.keyboard.press('Escape');
+    await sleep(500);
+    await snap(page, '02-after-dismiss', log);
 
-    // 不刷新页面（实测 reload 后 Lovart chat agent 处理 prompt 会有问题）
-    // 等 chat panel 加载
-    await snap(page, '03-before-wait-panel', log);
-    for (let i = 1; i <= 10; i++) {
-      const inputs = await page.$$eval('[role="textbox"], div[contenteditable="true"], textarea', (els) =>
+    // 3. 检查 chat panel 是否就绪
+    let inputs = 0;
+    for (let i = 1; i <= 5; i++) {
+      inputs = await page.$$eval('[role="textbox"], div[contenteditable="true"], textarea', (els) =>
         els.filter((e) => e.offsetParent !== null).length,
       );
       if (inputs > 0) {
-        log.info(`chat panel 就绪（输入框=${inputs}）`);
+        log.info(`✓ chat panel 就绪（输入框=${inputs}）`);
         break;
       }
-      await humanSleep(2000, 3000);
+      log.info(`   轮 ${i}: 输入框=0，等 2s`);
+      await sleep(2000);
+    }
+    if (inputs === 0) {
+      throw new Error('chat panel 5 轮后仍未加载');
     }
 
-    // 上传参考素材图（一次，每条 prompt 共用）
-    await humanSleep(2000, 4000);
+    // 4. 上传参考图（暂时跳过，DataTransfer 会让 Lovart 崩）
     await uploadReferenceImage(page, log, task.modelImage);
 
-    await humanSleep(2000, 4000);
-
-    // 逐条跑 prompt
+    // 5. 逐条跑 prompt
     for (let i = 0; i < task.prompts.length; i++) {
       const p = task.prompts[i];
-      log.info(`▶ ${i + 1}/${task.prompts.length} | taskType=${p.taskType} | 文件夹=${p.folder}`);
+      log.info(`▶▶ prompt ${i + 1}/${task.prompts.length} | ${p.taskType} | 文件夹=${p.folder}`);
 
-      // 记录发送前画布上的图片数（用于判定本次新生成的图）
       prevImgCount = await countResultImages(page);
 
-      // 在输入框中输入完整 prompt
+      // 输入 + 发送
       await inputPrompt(page, log, p.text);
-
-      // 点击 Agent 发送
       await clickSend(page, log);
 
-      // 等待生成完成（轮询：loading 出现→消失 + 新图出现）
+      // 等生成完成
       await waitForGenerationDone(page, log, prevImgCount);
 
-      // 下载本次新生成的图
+      // 下载图片
       const localFiles = await downloadNewResults(page, log, {
         rowDir: path.join(config.downloadsDir, todayStr(), task.styleNo, p.folder),
         startCount: prevImgCount,
@@ -153,10 +136,11 @@ async function runRow(workerLabel, task, hooks = {}) {
       });
     }
 
-    log.info(`✅ 完成 recordId=${task.recordId}`);
+    log.info(`✅ 完成 recordId=${task.recordId} 共 ${results.length} 条 prompt`);
     return { recordId: task.recordId, styleNo: task.styleNo, results };
   } finally {
     await ctx.close();
+    await browser.close();
   }
 }
 
