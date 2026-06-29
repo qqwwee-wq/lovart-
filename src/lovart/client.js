@@ -50,7 +50,7 @@ async function runRow(workerLabel, task, hooks = {}) {
   const log = makeLogger(`lovart.client.${workerLabel}`);
   log.info(`▶ 开始 recordId=${task.recordId} 款号=${task.styleNo} 提示词=${task.prompts.length}`);
 
-  const { browser, ctx, page } = await newContext(workerLabel);
+  let { browser, ctx, page } = await newContext(workerLabel);
 
   // 用于记录每条 prompt 之前画布上已有的 img 数（用于"增量"判定新生成的图）
   let prevImgCount = 0;
@@ -104,10 +104,42 @@ async function runRow(workerLabel, task, hooks = {}) {
     // 4. 上传参考图（暂时跳过，DataTransfer 会让 Lovart 崩）
     await uploadReferenceImage(page, log, task.modelImage);
 
-    // 5. 逐条跑 prompt
+    // 5. 逐条跑 prompt（从第 2 个起，每个 prompt 用新 browser/canvas，避免 Lovart 多 prompt 状态破坏）
     for (let i = 0; i < task.prompts.length; i++) {
       const p = task.prompts[i];
       log.info(`▶▶ prompt ${i + 1}/${task.prompts.length} | ${p.taskType} | 文件夹=${p.folder}`);
+
+      // 从第 2 个 prompt 起，关闭旧 + 开新 browser（每个 prompt 独立项目）
+      if (i > 0) {
+        log.info('   关闭旧项目，开新 browser');
+        try { await ctx.close(); } catch (_) {}
+        try { await browser.close(); } catch (_) {}
+        const r = await newContext(workerLabel);
+        browser = r.browser;
+        ctx = r.ctx;
+        page = r.page;
+        // 重新打开 canvas + dismiss + 等 panel
+        await page.goto(selectors.canvas.newProjectUrl, {
+          waitUntil: 'domcontentloaded',
+          timeout: 60_000,
+        });
+        await humanSleep(5000, 7000);
+        for (const text of ['Next', 'Get started', '跳过', '知道了']) {
+          const btn = await page.$(`button:has-text("${text}")`);
+          if (btn) { await btn.click({ force: true }); await sleep(1500); }
+        }
+        await page.keyboard.press('Escape');
+        await sleep(500);
+        await page.keyboard.press('Escape');
+        await sleep(500);
+        for (let j = 1; j <= 5; j++) {
+          const inp = await page.$$eval('[role="textbox"], div[contenteditable="true"], textarea', (els) =>
+            els.filter((e) => e.offsetParent !== null).length,
+          );
+          if (inp > 0) break;
+          await sleep(2000);
+        }
+      }
 
       prevImgCount = await countResultImages(page);
 
