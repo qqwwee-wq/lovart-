@@ -41,3 +41,4 @@ test-results/
 tmp/
 temp/
 .cache/
+data/reference-images/
