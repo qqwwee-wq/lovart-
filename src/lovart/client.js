@@ -101,6 +101,14 @@ async function runRow(workerLabel, task, hooks = {}) {
       throw new Error('chat panel 5 轮后仍未加载');
     }
 
+
+    // 3.5 选模型 Nano Banana 2（点右下角设置按钮 → 弹出菜单选模型）
+    try {
+      await selectModel(page, log, config.business.lovartModel);
+      log.info(`   模型已选: ${config.business.lovartModel}`);
+    } catch (e) {
+      log.warn(`   选模型失败（继续）: ${e.message}`);
+    }
     // 4. 上传参考图（暂时跳过，DataTransfer 会让 Lovart 崩）
     await uploadReferenceImage(page, log, task.modelImage);
 
@@ -147,8 +155,32 @@ async function runRow(workerLabel, task, hooks = {}) {
       await inputPrompt(page, log, p.text);
       await clickSend(page, log);
 
-      // 等生成完成
-      await waitForGenerationDone(page, log, prevImgCount);
+      // 快速积分检查：看 task/take/slot 是否 FAIL
+      let hasCredits = true;
+      for (let ct = 0; ct < 6; ct++) {
+        await sleep(5000);
+        const slotStat = await page.evaluate(async () => {
+          try {
+            const r = await fetch('https://www.lovart.ai/api/canva/agent-cashier/task/take/slot', {
+              method: 'POST', credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ project_id: window.location.href.match(/projectId=([^&]+)/)?.[1] || '', cid: 'check' }),
+            });
+            const d = await r.json();
+            return d?.data?.status || '?';
+          } catch (_) { return 'err'; }
+        });
+        if (slotStat === 'FAIL') { hasCredits = false; log.warn('   ❌ task/take/slot FAIL — 积分不足，跳过等待'); break; }
+        if (slotStat !== '?') { log.info(`   slot status: ${slotStat}`); }
+      }
+
+      if (hasCredits) {
+        // 等生成完成
+        await waitForGenerationDone(page, log, prevImgCount);
+      } else {
+        log.warn('   积分不够，跳过等待直接标记失败');
+        throw new Error('Lovart 积分不足（task/take/slot FAIL）');
+      }
 
       // 下载图片
       const localFiles = await downloadNewResults(page, log, {
@@ -454,6 +486,38 @@ async function downloadNewResults(page, log, { rowDir, startCount }) {
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * 选择模型：先点 thinking-mode → 再点 settings → 弹出模型列表 → 选 Nano Banana 2
+ * （实测只有两个按钮都点后 popover 才渲染模型列表）
+ */
+async function selectModel(page, log, modelName) {
+  log.info(`   选择模型: ${modelName}`);
+  // Step 1: 先点 thinking-mode-button（触发内部 panel，让模型列表可渲染）
+  try {
+    const thinkingBtn = page.locator('[data-testid="agent-thinking-mode-button"]');
+    if (await thinkingBtn.count() > 0) {
+      await thinkingBtn.click({ force: true });
+      await sleep(1000);
+    }
+  } catch (_) {}
+  // Step 2: 点 settings-button 打开模型列表
+  const settingsBtn = page.locator('[data-testid="agent-custom-settings-button"]');
+  if (await settingsBtn.count() === 0) { log.warn('   找不到设置按钮'); return; }
+  await settingsBtn.click({ force: true });
+  await sleep(2500);
+  // Step 3: 找模型名并点击
+  try {
+    const nb2 = page.locator(`text="${modelName}"`).first();
+    if (await nb2.count() > 0 && await nb2.isVisible().catch(() => false)) {
+      await nb2.click({ force: true });
+      log.info(`   ✓ 已选 ${modelName}`);
+      await sleep(500);
+      return;
+    }
+  } catch (_) {}
+  log.warn(`   未找到模型 "${modelName}"`);
 }
 
 module.exports = { runRow };
