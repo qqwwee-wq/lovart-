@@ -153,7 +153,14 @@ async function runRow(workerLabel, task, hooks = {}) {
 
       // 输入 + 发送
       await inputPrompt(page, log, p.text);
-      await clickSend(page, log);
+
+      if (task.uploadTest) {
+        log.info('   [UPLOAD TEST] 不发送，验证输入+图片就绪');
+        await snap(page, '04-upload-test', log);
+        log.info('   ✅ 上传测试通过，关闭 browser');
+        await sleep(2000);
+        return { recordId: task.recordId, styleNo: task.styleNo, results: [{ taskType: p.taskType, writeField: p.writeField, folder: p.folder, localFiles: [] }] };
+      }      await clickSend(page, log);
 
       // 快速积分检查：看 task/take/slot 是否 FAIL
       let hasCredits = true;

@@ -34,6 +34,7 @@ async function main() {
   const limitArg = args.find((a) => a.startsWith('--limit='));
   const limit = limitArg ? parseInt(limitArg.split('=')[1]) : null;
   const recordArg = args.find((a) => a.startsWith('--record='));
+  const uploadTest = args.includes('--upload-test');
   const recordId = recordArg ? recordArg.split('=')[1] : null;
 
   // 安静模式降级日志
@@ -65,6 +66,7 @@ async function main() {
       recordId,
       limit,
       dryRun,
+      uploadTest,
     });
 
     const duration = Math.round((Date.now() - startTs) / 1000);

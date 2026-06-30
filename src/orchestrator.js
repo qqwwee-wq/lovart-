@@ -25,7 +25,7 @@ function getPool() {
  * @param {number} [opts.limit] 最多处理 N 行
  * @param {boolean} [opts.dryRun] 只读表+拼任务，不真生成
  */
-async function runOnce({ trigger = 'manual', recordId = null, limit = null, dryRun = false } = {}) {
+async function runOnce({ trigger = 'manual', recordId = null, limit = null, dryRun = false, uploadTest = false } = {}) {
   if (_runningRunId) {
     log.warn(`已有运行中的批次 ${_runningRunId}，拒绝新触发`);
     return { runId: _runningRunId, skipped: true };
@@ -61,7 +61,8 @@ async function runOnce({ trigger = 'manual', recordId = null, limit = null, dryR
       tasks = tasks.slice(0, limit);
     }
 
-    log.info(`[${runId}] 拼出 ${tasks.length} 个可执行任务`);
+    log.info(`[${runId}] 拼出 ${tasks.length} 个可执行任务${uploadTest ? ' (uploadTest 模式：只测上传不发 send)' : ''}`);
+    if (uploadTest) tasks = tasks.map((t) => ({ ...t, uploadTest: true }));
 
     if (tasks.length === 0) {
       log.info(`[${runId}] 没有可执行任务，结束`);
