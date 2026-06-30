@@ -110,7 +110,7 @@ async function runRow(workerLabel, task, hooks = {}) {
       log.warn(`   选模型失败（继续）: ${e.message}`);
     }
     // 4. 上传参考图（暂时跳过，DataTransfer 会让 Lovart 崩）
-    await uploadReferenceImage(page, log, task.modelImage);
+    await uploadReferenceImage(page, log, task, task.modelImage);
 
     // 5. 逐条跑 prompt（从第 2 个起，每个 prompt 用新 browser/canvas，避免 Lovart 多 prompt 状态破坏）
     for (let i = 0; i < task.prompts.length; i++) {
@@ -255,11 +255,59 @@ async function dismissOnboarding(page, log) {
  *    实测：t=90s 后页面仍然 empty。这是 Lovart 自身的 bug，我们绕不过去。
  *    临时方案：直接跳过图片上传，prompt 里有详细描述也能生成（实测通过）。
  */
-async function uploadReferenceImage(page, log, modelImage) {
-  log.info(`⚠️  跳过参考图上传（Lovart chat panel 在 DataTransfer 后会崩，已知 bug）`);
-  log.info(`   直接用 prompt 文字描述生成（参考图 URL: ${(modelImage.url || '').slice(0, 80)}...）`);
-  // 不做任何上传操作，让 prompt 走文本-only 路径
-  return;
+async function uploadReferenceImage(page, log, task, modelImage) {
+  log.info(`上传参考图: ${modelImage.filename || 'reference'}`);
+  // Step 1: 下原图到 data/reference-images/<recordId>_<款号>.<ext>
+  const ext = (modelImage.filename || 'ref.png').match(/.[^.]+$/)?.[0] || '.png';
+  const localDir = path.resolve(__dirname, '..', '..', 'data', 'reference-images');
+  if (!fs.existsSync(localDir)) fs.mkdirSync(localDir, { recursive: true });
+  const localFile = path.join(localDir, `${task.recordId}_${task.styleNo}${ext}`);
+  await downloadOne(modelImage.url, localFile);
+  let stat = fs.statSync(localFile);
+  log.info(`   已存: ${localFile} (${(stat.size/1024/1024).toFixed(2)} MB)`);
+  // Step 2: >2MB 压缩成同名 .jpg
+  let fileToUpload = localFile;
+  if (stat.size > 2 * 1024 * 1024) {
+    log.info('   压缩到 <2MB');
+    const compressedB64 = await page.evaluate(async ({ b64 }) => {
+      const img = new Image(); img.src = 'data:image/jpeg;base64,' + b64;
+      await new Promise((r, j) => { img.onload = r; img.onerror = j; setTimeout(() => j(new Error('timeout')), 10000); });
+      let { width, height } = img;
+      const scale = Math.min(1, Math.sqrt((1.5 * 1024 * 1024) / (b64.length * 0.75)));
+      width = Math.round(width * scale); height = Math.round(height * scale);
+      const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+      return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    }, { b64: fs.readFileSync(localFile).toString('base64') });
+    fileToUpload = localFile.replace(/.[^.]+$/, '') + '.jpg';
+    fs.writeFileSync(fileToUpload, Buffer.from(compressedB64, 'base64'));
+    log.info(`   压缩存: ${fileToUpload} (${(fs.statSync(fileToUpload).size/1024/1024).toFixed(2)} MB)`);
+  }
+  // Step 3: 注册 fileChooser 监听器（接收系统 dialog），点 + → 上传文件 → 自动喂文件
+  log.info('   准备 fileChooser 监听 + 点 + 触发系统 dialog');
+  const fileChooserPromise = page.waitForEvent('filechooser', { timeout: 15000 }).catch(() => null);
+  // 点 + 按钮
+  const plusBtn = page.locator('button').filter({ has: page.locator('svg path[d^="M11.25"]') }).first();
+  if (await plusBtn.count() === 0) { log.warn('   找不到 + 按钮'); return; }
+  await plusBtn.click({ force: true });
+  await sleep(1500);
+  // 点 "上传文件" 菜单项
+  const up = page.locator('text=上传文件').first();
+  if (await up.count() > 0) {
+    await up.click({ force: true });
+    log.info('   ✓ 点了 "上传文件"');
+  } else {
+    log.warn('   找不到 "上传文件" 项');
+  }
+  // 等 fileChooser 事件（系统文件对话框）
+  const fileChooser = await fileChooserPromise;
+  if (fileChooser) {
+    await fileChooser.setFiles(fileToUpload);
+    log.info(`   ✓ fileChooser setFiles: ${fileToUpload}`);
+    await sleep(3000);
+  } else {
+    log.warn('   fileChooser 未触发（超时）');
+  }
 }
 async function inputPrompt(page, log, text) {
   log.info(`输入 prompt（${text.length} 字）`);
