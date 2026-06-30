@@ -54,6 +54,23 @@ async function updateStatusMany(items /* [{recordId, status}] */) {
 async function uploadImageToField({ recordId, fieldId, filePath }) {
   const stat = fs.statSync(filePath);
   const fileName = path.basename(filePath);
+  const buf = fs.readFileSync(filePath);
+  const base64 = buf.toString('base64');
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeMap = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp' };
+  const fileType = mimeMap[ext] || 'application/octet-stream';
+  log.debug("upload (inline base64)", { recordId, fieldId, fileName, size: stat.size });
+  const cells = { [fieldId]: [{ fileName, fileType, data: base64 }] };
+  return recordUpdate({
+    baseId: config.dingtalk.baseId,
+    tableId: config.dingtalk.productTableId,
+    records: [{ recordId, cells }],
+  });
+}
+
+/**
+  const stat = fs.statSync(filePath);
+  const fileName = path.basename(filePath);
 
   log.debug('准备上传', { recordId, fieldId, fileName, size: stat.size });
   const prepRes = await attachmentPrepare({

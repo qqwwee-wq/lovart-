@@ -58,9 +58,8 @@ async function recordUpdate({ baseId, tableId, records }) {
 async function attachmentPrepare({ baseId, tableId, recordId, fieldId, fileName, fileSize }) {
   return run([
     'aitable', 'attachment', 'upload',
-    '--base-id', baseId, '--table-id', tableId,
-    '--record-id', recordId, '--field-id', fieldId,
-    '--file-name', fileName, '--file-size', String(fileSize),
+    '--base-id', baseId,
+    '--file-name', fileName, '--size', String(fileSize),
     '--format', 'json',
   ]);
 }
