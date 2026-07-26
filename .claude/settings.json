@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/auto-login.js --timeout=600)",
+      "Bash(node scripts/run-all.js --dry)",
+      "Bash(node scripts/run-all.js --visible)",
+      "Bash(node -e \"const { runRow } = require\\('./src/lovart/client'\\); console.log\\('✅ client.js loaded, runRow:', typeof runRow\\);\")"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "data": {
+    "expiresAt": "2026-07-10T07:13:11.300953344Z",
+    "fileToken": "ft_5D8LBAfDjSfS4DZG8oJmtP",
+    "uploadHeaders": {},
+    "uploadMethod": "PUT",
+    "uploadUrl": "https://alidocs2.oss-cn-zhangjiakou.aliyuncs.com/res/1wvqreb9zRz2znak/img/b28f2582-805d-484d-8836-63c50929a1da.png?Expires=1783665791&OSSAccessKeyId=LTAI5tKTjg4Kq1HCdBJ8qpSp&Signature=UA7U02geINtbgwix80d6gCJHYXA%3D"
+  },
+  "error": {},
+  "meta": {},
+  "status": "success",
+  "summary": "Prepared attachment upload for file 'test.png'. Upload the bytes to uploadUrl, then use the returned fileToken in create_records or update_records attachment writes."
+}
