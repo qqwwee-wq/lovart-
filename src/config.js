@@ -37,38 +37,38 @@ const config = {
   },
   dingtalk: {
     baseId: required('DINGTALK_BASE_ID'),
-    productTableId: required('DINGTALK_PRODUCT_TABLE_ID'),
-    promptTableId: required('DINGTALK_PROMPT_TABLE_ID'),
+    productTableId: required('DINGTALK_PRODUCT_TABLE_ID'),  // lovart慢速生图表
     // 鉴权
     appKey: process.env.DINGTALK_APP_KEY || '',
     appSecret: process.env.DINGTALK_APP_SECRET || '',
     staticAccessToken: process.env.DINGTALK_ACCESS_TOKEN || '',
-    // 字段映射（生图表）
+    // 字段映射（lovart慢速生图表 tDKCnjU）
     fields: {
       product: {
-        modelImage: process.env.PRODUCT_FIELD_MODEL_IMAGE || 'DnmBokE',
-        result: process.env.PRODUCT_FIELD_RESULT || 'szTnEwE',
-        resultHalf: process.env.PRODUCT_FIELD_RESULT_HALF || '6z0bsDG',
-        needHalf: process.env.PRODUCT_FIELD_NEED_HALF || 'd0kMhUg',
-        styleNo: process.env.PRODUCT_FIELD_STYLE_NO || 'bbhOm6a',
-        status: process.env.PRODUCT_FIELD_STATUS || 'RicGRRL',
-      },
-      prompt: {
-        requirements: process.env.PROMPT_FIELD_REQUIREMENTS || 'K8j3XfP',
-        taskType: process.env.PROMPT_FIELD_TASK_TYPE || 'qPAYcMw',
-        resolution: process.env.PROMPT_FIELD_RESOLUTION || 'XNg9do5',
-        ratio: process.env.PROMPT_FIELD_RATIO || '2yoWPdm',
-        count: process.env.PROMPT_FIELD_COUNT || 'wYvotko',
-        rules: process.env.PROMPT_FIELD_RULES || 'XwixyRq',
+        modelImage: process.env.PRODUCT_FIELD_MODEL_IMAGE || 'Kazj7iR',  // 素材图
+        result:     process.env.PRODUCT_FIELD_RESULT      || 'cFh92nW',  // 生成结果
+        styleNo:    process.env.PRODUCT_FIELD_STYLE_NO    || 'J9cORMb',  // 款号
+        status:     process.env.PRODUCT_FIELD_STATUS      || '9LNltPj',  // 状态 (执行状态)
+        genStatus:  process.env.PRODUCT_FIELD_GEN_STATUS  || 'XzTcnFY',  // 出图状态 (运营已确认则跳过)
+        prompt:     process.env.PRODUCT_FIELD_PROMPT      || 'VgE7ByO',  // 提示词（每行自带）
       },
     },
+    // OpenAPI 直连模式启用条件：配了 operatorUserId 才走 v1.0/notable/... OpenAPI
+    // 否则走 dws CLI 兜底（部署服务器时仍需 dws 二进制）
+    // operatorUserId = 钉钉 corp 成员 userId（运营用 admin 自己的钉钉 userId 即可）
+    operatorUserId: process.env.DINGTALK_OPERATOR_USERID || '',
   },
   business: {
-    workerCount: intOr('WORKER_COUNT', 5),
-    lovartModel: process.env.LOVART_MODEL || 'Nano Banana 2',
-    imageRatio: process.env.IMAGE_RATIO || '3:4',
-    imageResolution: process.env.IMAGE_RESOLUTION || '2K',
-    imagesPerPrompt: intOr('IMAGES_PER_PROMPT', 5),
+    workerCount: intOr('WORKER_COUNT', 3),
+    // 等图超时（秒）。实测 Lovart 正常 60-180s，限速时可达 10-20 分钟。默认 20min
+    lovartGenTimeoutSec: intOr('LOVART_GEN_TIMEOUT_SEC', 1200),
+    // 单行 prompt 失败自适应重试
+    //   - 重试上限（首次算 attempt 1，重试算 attempt 2..N）
+    promptRetryMax: intOr('PROMPT_RETRY_MAX', 5),
+    //   - 重试基础退避（attempt 2 → 等这么久；attempt 3 → ×mult；attempt 4 → ×mult² …）
+    promptRetryBaseMs: intOr('PROMPT_RETRY_BASE_MS', 300000), // 5 分钟
+    //   - 指数倍数
+    promptRetryMult: intOr('PROMPT_RETRY_MULT', 2),
     // 状态枚举值
     status: {
       pending: '待处理',
@@ -89,7 +89,11 @@ const config = {
     level: process.env.LOG_LEVEL || 'info',
     dir: path.resolve(__dirname, '..', process.env.LOG_DIR || './logs'),
   },
-  downloadsDir: path.resolve(__dirname, '..', 'downloads'),
+  // 生图结果输出目录（运营约定的本地保存路径）
+  // - 默认 C:\lovart生图结果：运营在 Windows 上的固定目录
+  // - 环境变量 LOVART_OUTPUT_DIR 可覆盖
+  // - 结构：{LOVART_OUTPUT_DIR}/{YYYY-MM-DD}/{款号}/{prompt-folder}/imgXX.png
+  downloadsDir: process.env.LOVART_OUTPUT_DIR || 'C:\\lovart生图结果',
   captcha: {
     twoCaptchaApiKey: process.env.TWO_CAPTCHA_API_KEY || '',
     // 2Captcha API base

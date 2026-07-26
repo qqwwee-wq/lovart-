@@ -3,7 +3,7 @@
 
 const config = require('./config');
 const { makeLogger } = require('./logger');
-const { fetchProductRows, fetchPromptRows } = require('./dingtalk/sheets');
+const { fetchProductRows } = require('./dingtalk/sheets');
 const { buildTasks } = require('./utils/buildTask');
 const { WorkerPool } = require('./workers/pool');
 
@@ -21,9 +21,10 @@ function getPool() {
  * 主入口：拉数据 → 拼任务 → 入队
  * @param {object} opts
  * @param {string} [opts.trigger='manual']
- * @param {string} [opts.recordId] 指定只跑某一行（保留以兼容老逻辑）
+ * @param {string} [opts.recordId] 指定只跑某一行
  * @param {number} [opts.limit] 最多处理 N 行
  * @param {boolean} [opts.dryRun] 只读表+拼任务，不真生成
+ * @param {boolean} [opts.uploadTest] 只测上传不发 send
  */
 async function runOnce({ trigger = 'manual', recordId = null, limit = null, dryRun = false, uploadTest = false } = {}) {
   if (_runningRunId) {
@@ -36,18 +37,10 @@ async function runOnce({ trigger = 'manual', recordId = null, limit = null, dryR
 
   try {
     // 1) 拉数据
-    const [productRows, promptRows] = await Promise.all([
-      fetchProductRows(),
-      fetchPromptRows(),
-    ]);
+    const productRows = await fetchProductRows();
 
-    // 2) 拼任务
-    let tasks = buildTasks(
-      productRows,
-      promptRows,
-      config.dingtalk.fields.product,
-      config.dingtalk.fields.prompt,
-    );
+    // 2) 拼任务（每行自带提示词，不再依赖提示词表）
+    let tasks = buildTasks(productRows, config.dingtalk.fields.product);
 
     // 如果指定 recordId，过滤只跑这一行
     if (recordId) {
@@ -72,10 +65,10 @@ async function runOnce({ trigger = 'manual', recordId = null, limit = null, dryR
     // dry-run 模式只返回任务清单
     if (dryRun) {
       log.info(`[${runId}] dry-run 模式，跳过实际生成`);
-      return { runId, tasks: tasks.length, dryRun: true, sample: tasks.slice(0, 3).map((t) => ({ recordId: t.recordId, styleNo: t.styleNo, prompts: t.prompts.length })) };
+      return { runId, tasks: tasks.length, dryRun: true, sample: tasks.slice(0, 3).map((t) => ({ recordId: t.recordId, styleNo: t.styleNo, promptLen: t.prompts[0]?.text?.length || 0 })) };
     }
 
-    // 3) 入队 + 等待完成
+    // 3) 入队 + 等待完成（N 个 worker 各自维护浏览器窗口，循环跑任务）
     const pool = getPool();
     pool.enqueue(tasks);
     await pool.drain();

@@ -55,7 +55,7 @@ async function main() {
   log.info(`  模式: ${dryRun ? '🟡 dry-run（不真生成）' : '🟢 正式跑'}`);
   if (visible) log.info(`  👀 可视模式: headless=false${slowMo ? ` slowMo=${slowMo}ms` : ''}`);
   if (recordId) log.info(`  指定行: ${recordId}`);
-  log.info(`  并发 worker: ${config.business.workerCount}`);
+  log.info(`  并发 worker: ${config.business.workerCount}（N 个窗口保持循环跑任务）`);
   log.info(`  输出目录: ${config.downloadsDir}`);
   log.info(`  Lovart URL: ${config.lovart.homeUrl}`);
   log.info('');
@@ -79,7 +79,7 @@ async function main() {
     if (result.error) log.error(`  错误: ${result.error}`);
     if (result.dryRun && result.sample) {
       log.info(`  示例任务:`);
-      result.sample.forEach((s) => log.info(`    - recordId=${s.recordId} 款号=${s.styleNo} ${s.prompts}条 prompt`));
+      result.sample.forEach((s) => log.info(`    - recordId=${s.recordId} 款号=${s.styleNo} prompt=${s.promptLen}字`));
     }
   } catch (e) {
     banner('❌ 异常');

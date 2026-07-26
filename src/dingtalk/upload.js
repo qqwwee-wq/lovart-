@@ -69,54 +69,105 @@ async function uploadImageToField({ recordId, fieldId, filePath }) {
 }
 
 /**
+ * 单张图准备 + OSS 上传，返回带 url+resourceId 的 attachment
+ * 通过 attachmentPrepare 拿上传凭证 → PUT 文件到 OSS → 返回 OSS URL
+ */
+async function prepareAndOssUpload({ filePath }) {
   const stat = fs.statSync(filePath);
   const fileName = path.basename(filePath);
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeMap = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif' };
+  const mimeType = mimeMap[ext] || 'application/octet-stream';
 
-  log.debug('准备上传', { recordId, fieldId, fileName, size: stat.size });
+  // 1. 申请 OSS 上传凭证
   const prepRes = await attachmentPrepare({
     baseId: config.dingtalk.baseId,
     tableId: config.dingtalk.productTableId,
-    recordId,
-    fieldId,
+    recordId: 'bulk',
+    fieldId: 'bulk',
     fileName,
     fileSize: stat.size,
+    mimeType,
   });
-
-  // dws 返回可能用 data.* 包裹，兼容两种
   const prep = prepRes.data || prepRes;
   const uploadUrl = prep.uploadUrl || prep.upload_url || prep.url;
-  const resourceId = prep.resourceId || prep.resource_id;
-  const headers = prep.headers || prep.uploadHeaders || {};
-
-  if (!uploadUrl || !resourceId) {
+  const fileToken = prep.fileToken || prep.resourceId || prep.resource_id;
+  const resourceUrl = prepRes.resourceUrl || prep.resource_url || prep.resourceUrl || '';
+  const headers = { ...(prep.uploadHeaders || prep.headers || {}), 'Content-Type': mimeType };
+  if (!uploadUrl || !fileToken) {
     throw new Error(`attachmentPrepare 返回缺字段: ${JSON.stringify(prepRes).slice(0, 300)}`);
   }
 
-  await attachmentPutToOss({ uploadUrl, filePath, headers });
-  const confirmRes = await attachmentConfirm({
-    baseId: config.dingtalk.baseId,
-    tableId: config.dingtalk.productTableId,
-    recordId,
-    fieldId,
-    resourceId,
-  });
-  log.debug('上传完成', { recordId, fieldId, resourceId });
-  return confirmRes;
+  // 2. PUT 到 OSS
+  await attachmentPutToOss({ uploadUrl, filePath, headers, mimeType });
+
+  return { fileToken, fileName, mimeType, size: stat.size, resourceUrl, uploadUrl };
 }
 
 /**
- * 批量上传一组图片到同一字段（追加，不清空旧值）
+ * 批量上传一组图片到同一字段（一次性 recordUpdate，避免覆盖）
+ * 采用 OSS 上传方式（attachmentPrepare + PUT + 用返回的 url+resourceId）
  * @param {string} recordId
  * @param {string} fieldId
  * @param {string[]} filePaths
+ * @returns {{ok:boolean, failedFiles:string[], totalUploaded:number}}
  */
-async function uploadImagesToField(recordId, fieldId, filePaths) {
-  const results = [];
-  for (const fp of filePaths) {
-    const r = await uploadImageToField({ recordId, fieldId, filePath: fp });
-    results.push({ file: fp, ok: true, result: r });
+async function bulkUploadToField(recordId, fieldId, filePaths) {
+  if (!filePaths || filePaths.length === 0) {
+    return { ok: false, failedFiles: [], totalUploaded: 0 };
   }
-  return results;
+  const attachments = [];
+  const failedFiles = [];
+  for (const fp of filePaths) {
+    try {
+      const t = await prepareAndOssUpload({ filePath: fp });
+      attachments.push({
+        filename: t.fileName,
+        size: t.size,
+        type: 'image',
+        // URL 必须以 '/core/api/resources' 或 'https://alidocs.dingtalk.com/i/nodes' 开头
+        // resourceUrl 是 attachmentPrepare 返回的 resourceUrl（OpenAPI attachment 字段专用 URL）
+        url: t.resourceUrl || t.uploadUrl.split('?')[0],
+        resourceId: t.fileToken,
+      });
+    } catch (e) {
+      log.error('bulkUpload prepareAndOssUpload 失败', { fp, err: e.message });
+      failedFiles.push(fp);
+    }
+  }
+  if (attachments.length === 0) {
+    return { ok: false, failedFiles, totalUploaded: 0 };
+  }
+  const cells = { [fieldId]: attachments };
+  try {
+    const r = await recordUpdate({
+      baseId: config.dingtalk.baseId,
+      tableId: config.dingtalk.productTableId,
+      records: [{ recordId, cells }],
+    });
+    log.info(`[bulkUpload] ✅ ${recordId} / ${fieldId}: 上传 ${attachments.length} 张`);
+    return { ok: true, failedFiles, totalUploaded: attachments.length, result: r };
+  } catch (e) {
+    log.error('[bulkUpload] recordUpdate 失败', { recordId, fieldId, err: e.message });
+    return { ok: false, failedFiles: [...failedFiles, ...filePaths], totalUploaded: 0 };
+  }
 }
 
-module.exports = { updateStatus, updateStatusMany, uploadImageToField, uploadImagesToField };
+/**
+ * 上传单张图片到生图表某行的某个 attachment 字段（兼容旧代码）
+ */
+async function uploadImageToField({ recordId, fieldId, filePath }) {
+  const r = await bulkUploadToField(recordId, fieldId, [filePath]);
+  if (!r.ok) throw new Error(`uploadImageToField 失败: ${r.failedFiles.join(', ')}`);
+  return r.result;
+}
+
+/**
+ * 批量上传一组图片到同一字段（兼容旧代码：别名指向 bulkUploadToField）
+ */
+async function uploadImagesToField(recordId, fieldId, filePaths) {
+  const r = await bulkUploadToField(recordId, fieldId, filePaths);
+  return filePaths.map((fp) => ({ file: fp, ok: !r.failedFiles.includes(fp) }));
+}
+
+module.exports = { updateStatus, updateStatusMany, uploadImageToField, uploadImagesToField, bulkUploadToField, prepareAndOssUpload };

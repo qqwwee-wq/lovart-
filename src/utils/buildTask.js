@@ -1,100 +1,76 @@
-// src/utils/buildTask.js —— 把「生图表」+「提示词表」拼成 worker 可消费的任务对象
+// src/utils/buildTask.js —— 组装任务：
+//   每行 lovart慢速生图表 商品 = 1 个 task
+//   提示词直接从每行的「提示词」字段（VgE7ByO）读取
 'use strict';
 
-const { splitPrompts, segFolderName } = require('./splitPrompts');
-
-const TASK_TYPE_FULL = 'lovart生图';
-const TASK_TYPE_HALF = 'lovart生图（半身照）';
+const TASK_TYPE = 'lovart慢速生图';
 
 /**
- * @param {Array} productRows  生图表所有记录
- * @param {Array} promptRows   提示词表所有记录
+ * @param {Array} productRows  生图表（lovart慢速生图表）所有记录
  * @param {object} fP          生图表字段映射
- * @param {object} fR          提示词表字段映射
  * @returns {Array<{
  *   recordId, styleNo, modelImage,
- *   needHalf,                   // bool
- *   prompts: [{taskType, text, folder}],   // 这次要跑的提示词段
+ *   taskType,                      // 固定 'lovart慢速生图'
+ *   prompts: [{text, folder, writeField}]
  * }>}
  */
-function buildTasks(productRows, promptRows, fP, fR) {
-  // 1) 把提示词按任务类型分组
-  const byType = { [TASK_TYPE_FULL]: [], [TASK_TYPE_HALF]: [] };
-  for (const r of promptRows) {
-    const t = (r.cells[fR.taskType] || '').toString().trim();
-    if (!byType[t]) continue;
-    const rules = (r.cells[fR.rules] || '').toString().trim();
-    const req = (r.cells[fR.requirements] || '').toString().trim();
-    byType[t].push({ rules, requirements: req, raw: r });
-  }
-
-  // 2) 遍历生图表每一行
+function buildTasks(productRows, fP) {
   const tasks = [];
+
   for (const row of productRows) {
     const c = row.cells || {};
+
+    // 基本字段
     const styleNo = (c[fP.styleNo] || '').toString().trim();
     const modelImage = Array.isArray(c[fP.modelImage]) ? c[fP.modelImage][0] : c[fP.modelImage];
     const status = (c[fP.status] || '').toString().trim();
-    // 只跳 已完成 / 处理中 / 失败；空白 或 「待处理」 都视为可执行
-    if (['处理中', '已完成', '失败'].includes(status)) continue;
-    if (!styleNo || !modelImage || !modelImage.url) continue;
-    const needHalf = (() => {
-      const v = c[fP.needHalf];
-      if (!v) return false;
-      if (typeof v === 'object' && v.name) return v.name === '是';
-      return String(v).trim() === '是';
-    })();
+    const promptText = (c[fP.prompt] || '').toString().trim();
 
-    // 3) 组装要跑的提示词段（按用户规则）
-    const prompts = [];
-    let segIdx = 0;
-    // lovart生图（半身照）排在前面 or 后面都行，统一约定：先半身照（如果需要），再 lovart生图
-    if (needHalf && byType[TASK_TYPE_HALF].length) {
-      for (const promptRec of byType[TASK_TYPE_HALF]) {
-        const segs = splitPrompts(promptRec.requirements);
-        segs.forEach((seg, i) => {
-          prompts.push({
-            taskType: TASK_TYPE_HALF,
-            text: combinePrompt(promptRec.rules, seg),
-            folder: segFolderName(seg, ++segIdx),
-            writeField: fP.resultHalf,
-          });
-        });
+    // 跳过处理中/已完成（"失败"也重跑，因为可能是上传失败等可恢复错误）
+    if (['处理中', '已完成'].includes(status)) continue;
+    if (!styleNo || !modelImage || !modelImage.url) continue;
+    if (!promptText) {
+      // 提示词为空则跳过
+      continue;
+    }
+
+    // 出图状态过滤（XzTcnFY / singleSelect）：
+    //   - 「重试」/「待生图」 → 跑
+    //   - 「已确认」/ 其他枚举值 → 跳过
+    //   - 未设（运营没动过） → 视为「待生图」跑一次
+    if (fP.genStatus) {
+      const gs = c[fP.genStatus];
+      const gsName = (gs && typeof gs === 'object' ? gs.name : gs);
+      const gsStr = String(gsName || '').trim();
+      if (gsStr === '') {
+        // 未设值，默认可执行
+      } else if (gsStr === '重试' || gsStr === '待生图') {
+        // 显式标记为待跑
+      } else {
+        // 已确认 / 其他状态 → 跳过
+        continue;
       }
     }
-    for (const promptRec of byType[TASK_TYPE_FULL]) {
-      const segs = splitPrompts(promptRec.requirements);
-      segs.forEach((seg, i) => {
-        prompts.push({
-          taskType: TASK_TYPE_FULL,
-          text: combinePrompt(promptRec.rules, seg),
-          folder: segFolderName(seg, ++segIdx),
-          writeField: fP.result,
-        });
-      });
-    }
 
-    if (prompts.length === 0) continue;
+    // 每行 = 1 个 task，1 段 prompt，写到「生成结果」字段
+    const writeField = fP.result;
+    const folder = styleNo || 'unknown';
+
     tasks.push({
       recordId: row.recordId,
       styleNo,
       modelImage: { url: modelImage.url, filename: modelImage.filename, resourceId: modelImage.resourceId },
-      needHalf,
-      prompts,
+      taskType: TASK_TYPE,
+      prompts: [{
+        taskType: TASK_TYPE,
+        text: promptText,
+        folder,
+        writeField,
+      }],
     });
   }
+
   return tasks;
 }
 
-/**
- * 把通用规则 + 具体拍摄要求拼成最终提示词
- * 实际数据中 rules 和 requirements 各自已经含完整内容，提示词里也提到 "处理模型只能用Nano Banana 2"
- * 这里 rules 在前，requirements 在后（保持原表结构）
- */
-function combinePrompt(rules, requirement) {
-  if (!rules) return requirement;
-  if (!requirement) return rules;
-  return `${rules}\n${requirement}`;
-}
-
-module.exports = { buildTasks, TASK_TYPE_FULL, TASK_TYPE_HALF };
+module.exports = { buildTasks, TASK_TYPE };
