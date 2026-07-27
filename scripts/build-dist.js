@@ -99,6 +99,8 @@ function copyDir(src, dst, exclude = []) {
   }
 }
 
+// ========== 主流程 ==========
+(async () => {
 // 1. 清理 + 创建目录
 log('清理 dist...');
 if (fs.existsSync(DIST)) fs.rmSync(DIST, { recursive: true });
@@ -237,3 +239,4 @@ try {
 }
 
 log('完成');
+})().catch(e => { console.error('[build] 异常:', e.message); process.exit(1); });
