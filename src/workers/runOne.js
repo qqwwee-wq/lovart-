@@ -117,6 +117,24 @@ async function executeRow(workerLabel, task, opts = {}) {
   try {
     await updateStatus(task.recordId, finalStatus);
     log.info(`[${workerLabel}] 状态→${finalStatus}`);
+
+    // 成功后同步更新"出图状态"字段，防止下次扫描重复跑
+    if (finalStatus === config.business.status.done) {
+      try {
+        const { recordUpdate } = require('../dingtalk/client');
+        await recordUpdate({
+          baseId: config.dingtalk.baseId,
+          tableId: config.dingtalk.productTableId,
+          records: [{
+            recordId: task.recordId,
+            cells: { [config.dingtalk.fields.product.genStatus]: '已确认' },
+          }],
+        });
+        log.info(`[${workerLabel}] 出图状态→已确认`);
+      } catch (e) {
+        log.warn(`[${workerLabel}] 出图状态更新失败`, { err: e.message });
+      }
+    }
   } catch (e) {
     log.error(`[${workerLabel}] 状态→${finalStatus} 失败`, { err: e.message });
   }
