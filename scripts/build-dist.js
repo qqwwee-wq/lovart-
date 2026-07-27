@@ -175,14 +175,23 @@ if not exist "%NODE%" (
     exit /b 1
 )
 
-echo [Step 1/2] Installing browser (one-time, ~150MB)...
-"%NODE%" "%~dp0scripts\\setup-browser.js"
-if !errorlevel! neq 0 (
-    echo.
-    echo [ERROR] Browser install failed.
-    echo Please check your internet connection.
-    pause
-    exit /b 1
+echo.
+echo [Step 1/2] Browser install (~150MB, one-time)...
+echo Press S and Enter to SKIP, or just wait 10 seconds to install...
+choice /c si /t 10 /d i /m "" >nul 2>&1
+if !errorlevel! equ 1 (
+    echo Skipped browser install.
+) else (
+    echo Installing...
+    "%NODE%" "%~dp0scripts\\setup-browser.js"
+    if !errorlevel! neq 0 (
+        echo.
+        echo [WARNING] Browser install failed.
+        echo You can skip it next time or use a mirror:
+        echo   set PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/
+        echo   node scripts\\setup-browser.js
+        pause
+    )
 )
 
 echo.
