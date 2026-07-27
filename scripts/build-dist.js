@@ -137,7 +137,22 @@ if (fs.existsSync(envSrc)) {
   log('⚠️  .env 不存在！');
 }
 
-// 8. 创建 data/ 目录 + 复制 cookies
+// 8. 复制 Chromium 浏览器（离线可用）
+const playwrightBrowsers = process.env.PLAYWRIGHT_BROWSERS_PATH
+  || path.join(require('os').homedir(), 'AppData', 'Local', 'ms-playwright');
+if (fs.existsSync(playwrightBrowsers)) {
+  log('复制 Chromium 浏览器...');
+  const browsersDst = path.join(DIST, 'browsers');
+  const chromiumDirs = fs.readdirSync(playwrightBrowsers).filter(d => d.startsWith('chromium-'));
+  for (const d of chromiumDirs) {
+    copyDir(path.join(playwrightBrowsers, d), path.join(browsersDst, d));
+    log(`  ✅ ${d}`);
+  }
+} else {
+  log('⚠️  Playwright Chromium 未安装（首次运行需联网下载）');
+}
+
+// 9. 创建 data/ 目录 + 复制 cookies
 fs.mkdirSync(path.join(DIST, 'data'), { recursive: true });
 const cookiesSrc = path.join(ROOT, 'data', 'cookies.json');
 if (fs.existsSync(cookiesSrc)) {
@@ -162,8 +177,6 @@ echo ==========================================
 echo   Lovart Auto Image Generator
 echo ==========================================
 echo.
-echo First run will download Chromium (~150MB)
-echo.
 
 :: 使用内置便携 Node.js
 set "NODE=%~dp0node\\node.exe"
@@ -175,26 +188,8 @@ if not exist "%NODE%" (
     exit /b 1
 )
 
-echo.
-echo [Step 1/2] Browser check...
-echo.
-echo   10 seconds - Press ENTER to SKIP, or type I to install browser.
-echo.
-choice /c si /t 10 /d s /m "   [S]kip or [I]nstall? " >nul
-if !errorlevel! equ 1 (
-    echo   Skipped. The app will try to use existing Chrome/Chromium.
-) else (
-    echo   Installing...
-    "%NODE%" "%~dp0scripts\\setup-browser.js"
-    if !errorlevel! neq 0 (
-        echo.
-        echo   [WARNING] Browser install failed - will try system browser.
-        pause
-    )
-)
-
-echo.
-echo [Step 2/2] Starting server...
+:: 浏览器已内置，直接启动
+echo Starting...
 echo Control panel: http://localhost:3000
 echo.
 "%NODE%" "%~dp0scripts\\launcher.js"

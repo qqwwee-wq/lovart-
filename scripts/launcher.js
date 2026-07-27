@@ -8,6 +8,14 @@ const path = require('path');
 // 加载 .env
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
+// 优先使用打包内置的 Chromium（离线可用）
+const browsersDir = path.resolve(__dirname, '..', 'browsers');
+const fs = require('fs');
+if (fs.existsSync(browsersDir)) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = browsersDir;
+  console.log('[launcher] 使用内置 Chromium:', browsersDir);
+}
+
 const config = require('../src/config');
 const { makeLogger } = require('../src/logger');
 const log = makeLogger('launcher');
