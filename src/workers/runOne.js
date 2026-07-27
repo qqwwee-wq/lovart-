@@ -127,10 +127,10 @@ async function executeRow(workerLabel, task, opts = {}) {
           tableId: config.dingtalk.productTableId,
           records: [{
             recordId: task.recordId,
-            cells: { [config.dingtalk.fields.product.genStatus]: '已确认' },
+            cells: { [config.dingtalk.fields.product.genStatus]: '已完成' },
           }],
         });
-        log.info(`[${workerLabel}] 出图状态→已确认`);
+        log.info(`[${workerLabel}] 出图状态→已完成`);
       } catch (e) {
         log.warn(`[${workerLabel}] 出图状态更新失败`, { err: e.message });
       }
