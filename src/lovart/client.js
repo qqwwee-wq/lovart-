@@ -386,28 +386,69 @@ async function uploadReferenceImage(page, log, task, modelImage) {
 
   // Step 4: 注册 fileChooser，点 + → 上传文件 → 喂文件
   log.info('   准备 fileChooser 监听 + 点 + 触发系统 dialog');
+
+  // 多策略找 + 按钮（Lovart UI 可能变动）
+  let plusBtn = null;
+  // 策略 A: SVG path 匹配
+  plusBtn = page.locator('button').filter({ has: page.locator('svg path[d^="M11.25"]') }).first();
+  if (await plusBtn.count() === 0) {
+    // 策略 B: 找输入框旁边最近的 button
+    plusBtn = page.locator('[role="textbox"]').locator('..').locator('button').first();
+  }
+  if (await plusBtn.count() === 0) {
+    // 策略 C: 找页面中所有 small icon button（无文本的 button）
+    const btns = await page.$$('button');
+    for (const b of btns) {
+      const text = (await b.innerText()).trim();
+      const hasSvg = await b.$('svg');
+      if (!text && hasSvg) {
+        plusBtn = b; break;
+      }
+    }
+    if (!plusBtn) plusBtn = page.locator('button').first(); // 兜底
+  }
+  if (!plusBtn || (await plusBtn.count?.() === 0)) {
+    log.warn('   找不到 + 按钮（所有策略均失败）'); return;
+  }
+
   const fileChooserPromise = page.waitForEvent('filechooser', { timeout: 15000 }).catch(() => null);
-  // 点 + 按钮
-  const plusBtn = page.locator('button').filter({ has: page.locator('svg path[d^="M11.25"]') }).first();
-  if (await plusBtn.count() === 0) { log.warn('   找不到 + 按钮'); return; }
   await plusBtn.click({ force: true });
+  log.info('   ✓ 已点 + 按钮');
   await sleep(1500);
+
   // 点 "上传文件" 菜单项
   const up = page.locator('text=上传文件').first();
   if (await up.count() > 0) {
     await up.click({ force: true });
     log.info('   ✓ 点了 "上传文件"');
   } else {
-    log.warn('   找不到 "上传文件" 项');
+    // fallback: 试 "上传图片" 或其他
+    const alt = page.locator('text=/上传(文件|图片)/').first();
+    if (await alt.count() > 0) { await alt.click({ force: true }); log.info('   ✓ 点了备用上传菜单'); }
+    else { log.warn('   找不到 "上传文件" 项'); }
   }
+
   // 等 fileChooser 事件
   const fileChooser = await fileChooserPromise;
   if (fileChooser) {
     await fileChooser.setFiles(fileToUpload);
     log.info(`   ✓ fileChooser setFiles: ${fileToUpload}`);
-    await sleep(4000);
+    await sleep(5000); // 多等 1 秒确保 Lovart 上传完成
+
+    // 验证：上传后检查输入框是否出现图片 capsule
+    const hasCapsule = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="agent-mention-capsule-uploaded"]');
+      return !!el;
+    });
+    if (hasCapsule) {
+      log.info('   ✓ 已确认参考图 capsule 出现在输入框中');
+    } else {
+      log.warn('   ⚠ 上传后未在输入框检测到图片 capsule！参考图可能未发送');
+      await snap(page, 'upload-no-capsule', log);
+      // 不 return —— 继续跑，prompt 文字描述兜底
+    }
   } else {
-    log.warn('   fileChooser 未触发（超时）');
+    log.warn('   fileChooser 未触发（超时），继续纯文本模式');
   }
 }
 async function inputPrompt(page, log, text) {
