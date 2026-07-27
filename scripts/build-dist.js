@@ -152,41 +152,44 @@ fs.mkdirSync(path.join(DIST, 'logs'), { recursive: true });
 
 // 10. 生成 start.bat
 const bat = `@echo off
-chcp 65001 >nul
-title Lovart 慢速生图控制台
+setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
+:: 尝试设置 UTF-8，失败也不影响
+chcp 65001 >nul 2>&1
+
 echo ==========================================
-echo   Lovart 慢速生图控制台
+echo   Lovart Auto Image Generator
 echo ==========================================
 echo.
-echo 首次使用:
-echo   1. 需要安装 Node.js (https://nodejs.org)
-echo   2. 首次运行会自动安装浏览器组件（需联网）
-echo   3. 点击控制台的"登录 Lovart"按钮完成登录
-echo.
-echo 启动中...
+echo First run will download Chromium (~150MB)
 echo.
 
 :: 使用内置便携 Node.js
-set "NODE=%~dp0node\node.exe"
+set "NODE=%~dp0node\\node.exe"
 if not exist "%NODE%" (
-    echo [错误] 未找到 node.exe！请重新解压 zip 包
+    echo [ERROR] node.exe not found!
+    echo Please re-extract the zip file.
+    echo Path: %NODE%
     pause
     exit /b 1
 )
 
-echo [首次运行] 安装浏览器组件（需联网，~150MB，仅一次）
-"%NODE%" scripts\\setup-browser.js
-if %errorlevel% neq 0 (
-    echo [错误] 浏览器组件安装失败，请检查网络连接
+echo [Step 1/2] Installing browser (one-time, ~150MB)...
+"%NODE%" "%~dp0scripts\\setup-browser.js"
+if !errorlevel! neq 0 (
+    echo.
+    echo [ERROR] Browser install failed.
+    echo Please check your internet connection.
     pause
     exit /b 1
 )
 
-:: 启动
-echo [启动] 浏览器将自动打开 http://localhost:3000
-"%NODE%" scripts/launcher.js
+echo.
+echo [Step 2/2] Starting server...
+echo Control panel: http://localhost:3000
+echo.
+"%NODE%" "%~dp0scripts\\launcher.js"
 pause
 `;
 
