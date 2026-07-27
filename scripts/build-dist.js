@@ -11,7 +11,7 @@ const { execSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist', 'lovart-app');
 const CACHE = path.join(ROOT, 'dist', '.cache');
-const NODE_VERSION = 'v18.20.8'; // LTS 版本
+const NODE_VERSION = 'v22.20.0'; // LTS 版本（Playwright 需要 >=20）
 const NODE_ZIP = `node-${NODE_VERSION}-win-x64.zip`;
 const NODE_URL = `https://nodejs.org/dist/${NODE_VERSION}/${NODE_ZIP}`;
 
