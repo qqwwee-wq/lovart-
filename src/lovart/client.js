@@ -286,8 +286,9 @@ async function executeSinglePrompt(page, log, task, p, hooks) {
   await waitForGenerationDone(page, log, prevImgCount, prevImgUrls, targetCount);
 
   // 下载图片（按 URL 过滤已存在的，按 targetCount 限制张数）
+  // ⚠️ 必须包含 recordId，否则同款号并发时会互相覆盖文件导致图片串位
   const localFiles = await downloadNewResults(page, log, {
-    rowDir: path.join(config.downloadsDir, todayStr(), task.styleNo, p.folder),
+    rowDir: path.join(config.downloadsDir, todayStr(), task.styleNo, p.folder, task.recordId),
     prevUrls: prevImgUrls,
     targetCount,
   });
@@ -340,11 +341,8 @@ async function dismissOnboarding(page, log) {
 
 /**
  * 上传参考素材图到画布
- * ⚠️ 注意：Lovart 的 chat-style canvas 没有 file input，只能用 DataTransfer 拖拽。
- *    但 DataTransfer 会触发 Lovart React app 进入 "uploading" 状态，期间整个 chat panel
- *    会被 unmount，导致 inputPrompt 找不到输入框。
- *    实测：t=90s 后页面仍然 empty。这是 Lovart 自身的 bug，我们绕不过去。
- *    临时方案：直接跳过图片上传，prompt 里有详细描述也能生成（实测通过）。
+ * 流程：下载原图 → >2MB 压缩 → 聚焦输入框 → + → 上传文件 → fileChooser 喂文件
+ * 注意：inputPrompt 已修复（不再 selectAll 删除参考图，改为光标末尾追加文本）
  */
 async function uploadReferenceImage(page, log, task, modelImage) {
   log.info(`上传参考图: ${modelImage.filename || 'reference'}`);
@@ -472,7 +470,15 @@ async function inputPrompt(page, log, text) {
       }
       const e = visible.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0];
       e.focus();
-      document.execCommand('selectAll');
+      // 不要把已有内容（参考图）selectAll 删掉，改为追加到末尾
+      // 先把光标挪到 contenteditable 末尾
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      const range = document.createRange();
+      range.selectNodeContents(e);
+      range.collapse(false); // 折叠到末尾
+      sel.addRange(range);
+      // 再插入文本（不会覆盖已有内容）
       document.execCommand('insertText', false, text);
       return { ok: true };
     }, { text });
@@ -826,6 +832,7 @@ async function downloadNewResults(page, log, { rowDir, prevUrls, targetCount = 9
     return acc;
   }, {});
   log.info(`下载 ${limitedUrls.length} 张新结果图（候选 ${newUrls.length} 张，URL 域名=${JSON.stringify(domainCounts)}，targetCount=${targetCount}）`);
+  log.info(`   → 下载目录: ${rowDir}`);
 
   const localFiles = [];
   for (let i = 0; i < limitedUrls.length; i++) {
@@ -835,6 +842,7 @@ async function downloadNewResults(page, log, { rowDir, prevUrls, targetCount = 9
     try {
       await downloadOne(u, dest);
       localFiles.push(dest);
+      log.info(`     ↓ img${String(i + 1).padStart(2, '0')} → ${dest}`);
     } catch (e) {
       log.warn(`下载 #${i + 1} 失败: ${e.message.slice(0, 80)}`);
     }

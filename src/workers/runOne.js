@@ -38,8 +38,10 @@ async function executeRow(workerLabel, task, opts = {}) {
     runResult = await runRow(workerLabel, task, {
       onPromptDone: async (prompt, localFiles) => {
         log.info(`[${workerLabel}] prompt 完成 → 已存本地镜像`, {
+          recordId: task.recordId,
           folder: prompt.folder,
           count: localFiles.length,
+          files: localFiles.map(f => require('path').basename(f)),
         });
         const generated = localFiles.length;
 

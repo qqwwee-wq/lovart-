@@ -145,7 +145,7 @@ async function bulkUploadToField(recordId, fieldId, filePaths) {
       tableId: config.dingtalk.productTableId,
       records: [{ recordId, cells }],
     });
-    log.info(`[bulkUpload] ✅ ${recordId} / ${fieldId}: 上传 ${attachments.length} 张`);
+    log.info(`[bulkUpload] ✅ ${recordId} / ${fieldId}: 上传 ${attachments.length} 张 → ${filePaths.map(fp => require('path').basename(fp)).join(', ')}`);
     return { ok: true, failedFiles, totalUploaded: attachments.length, result: r };
   } catch (e) {
     log.error('[bulkUpload] recordUpdate 失败', { recordId, fieldId, err: e.message });
