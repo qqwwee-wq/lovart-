@@ -16,16 +16,40 @@ console.log('[setup] Playwright 浏览器缓存目录:', PLAYWRIGHT_CACHE);
 
 // ---- Step 1: 检查是否已安装 ----
 function isChromeInstalled() {
-  if (!fs.existsSync(PLAYWRIGHT_CACHE)) return false;
-  // 查找 chromium-* 目录
-  const dirs = fs.readdirSync(PLAYWRIGHT_CACHE).filter(d => d.startsWith('chromium-'));
-  for (const d of dirs) {
-    const chromeExe = path.join(PLAYWRIGHT_CACHE, d, 'chrome-win', 'chrome.exe');
-    if (fs.existsSync(chromeExe)) {
-      console.log('[setup] ✅ Chromium 已安装:', chromeExe);
+  // 检查 Playwright 缓存
+  if (fs.existsSync(PLAYWRIGHT_CACHE)) {
+    try {
+      const dirs = fs.readdirSync(PLAYWRIGHT_CACHE).filter(d => d.startsWith('chromium-'));
+      for (const d of dirs) {
+        const chromeExe = path.join(PLAYWRIGHT_CACHE, d, 'chrome-win', 'chrome.exe');
+        if (fs.existsSync(chromeExe)) {
+          console.log('[setup] ✅ Chromium 已安装:', chromeExe);
+          return true;
+        }
+      }
+    } catch (_) {}
+  }
+  // 检查系统 Chrome/Chromium
+  const systemPaths = [
+    path.join(process.env['PROGRAMFILES'] || 'C:\\Program Files', 'Google\\Chrome\\Application\\chrome.exe'),
+    path.join(process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)', 'Google\\Chrome\\Application\\chrome.exe'),
+    path.join(process.env['LOCALAPPDATA'] || '', 'Google\\Chrome\\Application\\chrome.exe'),
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ];
+  for (const p of systemPaths) {
+    if (fs.existsSync(p)) {
+      console.log('[setup] ✅ 系统 Chrome 已安装:', p);
       return true;
     }
   }
+  // 检查是否已经能启动 browser（cloakbrowser/playwright 或许已配置好）
+  try {
+    const { execSync } = require('child_process');
+    execSync(`"${NODE_EXE}" -e "require('cloakbrowser')"`, { timeout: 5000, stdio: 'pipe' });
+    console.log('[setup] ✅ cloakbrowser 模块正常，跳过浏览器下载');
+    return true; // 模块能加载说明之前装过了
+  } catch (_) {}
   return false;
 }
 

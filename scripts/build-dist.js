@@ -176,20 +176,19 @@ if not exist "%NODE%" (
 )
 
 echo.
-echo [Step 1/2] Browser install (~150MB, one-time)...
-echo Press S and Enter to SKIP, or just wait 10 seconds to install...
-choice /c si /t 10 /d i /m "" >nul 2>&1
+echo [Step 1/2] Browser check...
+echo.
+echo   10 seconds - Press ENTER to SKIP, or type I to install browser.
+echo.
+choice /c si /t 10 /d s /m "   [S]kip or [I]nstall? " >nul
 if !errorlevel! equ 1 (
-    echo Skipped browser install.
+    echo   Skipped. The app will try to use existing Chrome/Chromium.
 ) else (
-    echo Installing...
+    echo   Installing...
     "%NODE%" "%~dp0scripts\\setup-browser.js"
     if !errorlevel! neq 0 (
         echo.
-        echo [WARNING] Browser install failed.
-        echo You can skip it next time or use a mirror:
-        echo   set PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/
-        echo   node scripts\\setup-browser.js
+        echo   [WARNING] Browser install failed - will try system browser.
         pause
     )
 )
