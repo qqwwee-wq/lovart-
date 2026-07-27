@@ -75,6 +75,7 @@ fs.mkdirSync(path.join(DIST, 'logs'), { recursive: true });
 
 // 10. 生成 start.bat
 const bat = `@echo off
+chcp 65001 >nul
 title Lovart 慢速生图控制台
 cd /d "%~dp0"
 
