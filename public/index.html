@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lovart 慢速生图控制台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:#0f1117;color:#e1e4e8;min-height:100vh}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:20px;color:#58a6ff}
+.header-right{display:flex;align-items:center;gap:16px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600}
+.badge-green{background:#1a3329;color:#3fb950;border:1px solid #2ea043}
+.badge-red{background:#331a1f;color:#f85149;border:1px solid #da3633}
+.badge-yellow{background:#332f1a;color:#d29922;border:1px solid #bb8009}
+.dot{width:8px;height:8px;border-radius:50%}
+.dot-green{background:#3fb950}
+.dot-red{background:#f85149}
+.dot-yellow{background:#d29922;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:0.4}}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px}
+.card-title{font-size:14px;color:#8b949e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title .icon{font-size:18px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:6px;border:1px solid #30363d;background:#21262d;color:#c9d1d9;font-size:14px;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn:hover{background:#30363d;border-color:#58a6ff}
+.btn-primary{background:#1f6feb;border-color:#1f6feb;color:#fff}
+.btn-primary:hover{background:#388bfd}
+.btn-danger{color:#f85149}
+.btn-danger:hover{background:#da3633;color:#fff;border-color:#da3633}
+.btn-sm{padding:4px 12px;font-size:12px}
+.btn:disabled{opacity:0.4;cursor:not-allowed;pointer-events:none}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.controls label{font-size:13px;color:#8b949e;display:flex;align-items:center;gap:4px}
+.controls input[type=number]{width:60px;padding:4px 8px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#e1e4e8;font-size:13px}
+.controls input[type=checkbox]{accent-color:#1f6feb}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #21262d}
+th{color:#8b949e;font-weight:500}
+td{color:#c9d1d9}
+.status-tag{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.tag-ok{background:#1a3329;color:#3fb950}
+.tag-running{background:#1a2333;color:#58a6ff}
+.tag-failed{background:#331a1f;color:#f85149}
+.tag-idle{background:#21262d;color:#8b949e}
+.run-info{font-size:12px;color:#8b949e;margin-top:8px}
+.config-table td:first-child{color:#8b949e;width:200px}
+.config-table td:last-child{font-family:'Cascadia Code','Consolas',monospace;font-size:12px}
+.empty{text-align:center;padding:40px;color:#484f58}
+.empty p{font-size:13px}
+.spinner{width:20px;height:20px;border:2px solid #30363d;border-top-color:#58a6ff;border-radius:50%;animation:spin .8s linear infinite;display:none}
+.spinner.visible{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.worker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.worker-card{background:#0d1117;border:1px solid #21262d;border-radius:6px;padding:12px;text-align:center}
+.worker-card .w-label{font-size:11px;color:#8b949e;margin-bottom:4px}
+.worker-card .w-state{font-size:13px;font-weight:600}
+.worker-card .w-detail{font-size:11px;color:#8b949e;margin-top:4px;word-break:break-all}
+.alert{background:#331a1f;border:1px solid #da3633;color:#f85149;padding:10px 16px;border-radius:6px;font-size:13px;margin-bottom:16px;display:none}
+.alert.visible{display:block}
+.fs11{font-size:11px;color:#8b949e}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🎨 Lovart 慢速生图控制台</h1>
+  <div class="header-right">
+    <span id="uptime" class="fs11"></span>
+    <span id="loginBadge" class="badge badge-red"><span class="dot dot-red"></span>未登录</span>
+  </div>
+</div>
+<div class="container">
+  <div id="alertBox" class="alert"></div>
+  <div class="grid">
+    <!-- 控制区 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">⚙️</span> 任务控制</div>
+      <div class="controls">
+        <button id="btnStart" class="btn btn-primary" onclick="startTasks()">▶ 开始处理</button>
+        <button id="btnStop" class="btn btn-danger" onclick="stopTasks()" disabled>⏹ 停止</button>
+        <button id="btnLogin" class="btn" onclick="triggerLogin()">🔑 登录 Lovart</button>
+        <span id="runSpinner" class="spinner"></span>
+      </div>
+      <div class="controls" style="margin-top:8px">
+        <label><input type="checkbox" id="chkDry"> Dry Run</label>
+        <label>限制行数: <input type="number" id="limitRows" value="0" min="0"></label>
+      </div>
+      <div id="runInfo" class="run-info">就绪，等待开始</div>
+    </div>
+    <!-- Worker 状态 -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🖥️</span> Worker 状态</div>
+      <div class="worker-grid" id="workerGrid">
+        <div class="worker-card"><div class="w-label">W1</div><div class="w-state tag-idle">空闲</div></div>
+        <div class="worker-card"><div class="w-label">W2</div><div class="w-state tag-idle">空闲</div></div>
+        <div class="worker-card"><div class="w-label">W3</div><div class="w-state tag-idle">空闲</div></div>
+      </div>
+    </div>
+    <!-- 队列状态 -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-title"><span class="icon">📋</span> 任务队列</div>
+      <table id="queueTable">
+        <thead><tr><th>状态</th><th>Pending</th><th>Running</th><th>Done</th><th>成功</th><th>失败</th></tr></thead>
+        <tbody><tr><td colspan="6" class="empty"><p>等待状态更新...</p></td></tr></tbody>
+      </table>
+    </div>
+    <!-- 最近完成 -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-title"><span class="icon">✅</span> 最近完成记录</div>
+      <div id="doneList" class="empty"><p>暂无记录</p></div>
+    </div>
+    <!-- 配置信息 -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-title"><span class="icon">📝</span> 当前配置</div>
+      <table class="config-table" id="configTable"><tbody><tr><td colspan="2" class="empty"><p>加载中...</p></td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+<script>
+const BASE = '';
+let refreshTimer = null;
+
+async function api(path, opts = {}) {
+  const res = await fetch(BASE + path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  return res.json();
+}
+
+async function refresh() {
+  try {
+    const [status, login, config] = await Promise.all([
+      api('/api/status'),
+      api('/api/login/status'),
+      api('/api/config'),
+    ]);
+    renderStatus(status);
+    renderLogin(login);
+    renderConfig(config);
+    document.getElementById('uptime').textContent = status.uptime
+      ? '运行 ' + Math.floor(status.uptime / 60) + ' 分 ' + Math.floor(status.uptime % 60) + ' 秒'
+      : '';
+  } catch (e) {
+    console.error('refresh error', e);
+  }
+}
+
+function renderLogin(login) {
+  const badge = document.getElementById('loginBadge');
+  const btnLogin = document.getElementById('btnLogin');
+  if (login.loggedIn) {
+    badge.className = 'badge badge-green';
+    badge.innerHTML = '<span class="dot dot-green"></span>已登录';
+    btnLogin.textContent = '🔄 重新登录';
+  } else if (login.inProgress) {
+    badge.className = 'badge badge-yellow';
+    badge.innerHTML = '<span class="dot dot-yellow"></span>登录中...';
+    btnLogin.disabled = true;
+  } else {
+    badge.className = 'badge badge-red';
+    badge.innerHTML = '<span class="dot dot-red"></span>未登录';
+    btnLogin.disabled = false;
+  }
+}
+
+function renderStatus(s) {
+  const pool = s.pool || {};
+  const q = pool.queue || {};
+  const pending = q.pending || 0;
+  const running = q.running || 0;
+  const done = q.done || 0;
+  const doneList = q.doneList || [];
+  const ok = doneList.filter(d => d.status === 'ok').length;
+  const failed = doneList.filter(d => d.status === 'failed').length;
+
+  document.getElementById('queueTable').querySelector('tbody').innerHTML =
+    `<tr>
+      <td><span class="status-tag ${s.running ? 'tag-running' : 'tag-idle'}">${s.running ? '运行中' : '空闲'}</span></td>
+      <td>${pending}</td><td>${running}</td><td>${done}</td><td style="color:#3fb950">${ok}</td><td style="color:#f85149">${failed}</td>
+    </tr>`;
+
+  const btnStart = document.getElementById('btnStart');
+  const btnStop = document.getElementById('btnStop');
+  const spinner = document.getElementById('runSpinner');
+  if (s.running) {
+    btnStart.disabled = true;
+    btnStop.disabled = false;
+    spinner.classList.add('visible');
+  } else {
+    btnStart.disabled = false;
+    btnStop.disabled = true;
+    spinner.classList.remove('visible');
+  }
+  document.getElementById('runInfo').textContent = s.lastMessage || '';
+
+  // Worker cards
+  const workers = pool.workers || 0;
+  const grid = document.getElementById('workerGrid');
+  if (workers > 0) {
+    grid.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+      const active = i <= workers;
+      grid.innerHTML += `<div class="worker-card">
+        <div class="w-label">W${i}</div>
+        <div class="w-state ${active ? 'tag-running' : 'tag-idle'}">${active ? '运行中' : '空闲'}</div>
+      </div>`;
+    }
+  }
+
+  // Done list
+  if (doneList.length > 0) {
+    document.getElementById('doneList').innerHTML = doneList.slice(-10).reverse().map(d =>
+      `<div style="padding:4px 0;font-size:12px;display:flex;justify-content:space-between">
+        <span>${d.recordId || ''}</span>
+        <span class="status-tag ${d.status === 'ok' ? 'tag-ok' : 'tag-failed'}">${d.status}</span>
+        <span class="fs11">${d.ts ? new Date(d.ts).toLocaleTimeString() : ''}</span>
+      </div>`
+    ).join('');
+  }
+}
+
+function renderConfig(cfg) {
+  if (!cfg) return;
+  const rows = [
+    ['HTTP 端口', cfg.port],
+    ['Worker 数量', cfg.workerCount],
+    ['输出目录', cfg.outputDir],
+    ['Lovart URL', cfg.lovartHomeUrl],
+    ['钉钉 Base ID', cfg.dingtalk?.baseId],
+    ['钉钉表格 ID', cfg.dingtalk?.productTableId],
+    ['超时时间', cfg.business?.lovartGenTimeoutSec + ' 秒'],
+    ['重试上限', cfg.business?.promptRetryMax + ' 次'],
+    ['日志级别', cfg.log?.level],
+    ['Cookie 数量', cfg.cookieCount || 'N/A'],
+  ];
+  document.getElementById('configTable').querySelector('tbody').innerHTML = rows.map(r =>
+    `<tr><td>${r[0]}</td><td>${r[1] ?? '-'}</td></tr>`
+  ).join('');
+}
+
+async function startTasks() {
+  const dry = document.getElementById('chkDry').checked;
+  const limitVal = parseInt(document.getElementById('limitRows').value) || 0;
+  const body = {};
+  if (dry) body.dryRun = true;
+  if (limitVal > 0) body.limit = limitVal;
+  try {
+    const r = await api('/api/tasks/run', { method: 'POST', body });
+    showAlert(r.error ? 'error' : 'info', r.error || `已启动: runId=${r.runId}, ${r.tasks || 0} 个任务`);
+    refresh();
+  } catch (e) {
+    showAlert('error', '启动失败: ' + e.message);
+  }
+}
+
+async function stopTasks() {
+  try {
+    await api('/api/tasks/stop', { method: 'POST' });
+    showAlert('info', '已发送停止指令');
+    refresh();
+  } catch (e) {
+    showAlert('error', '停止失败: ' + e.message);
+  }
+}
+
+async function triggerLogin() {
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.textContent = '⏳ 启动浏览器...';
+  try {
+    const r = await api('/api/login', { method: 'POST' });
+    showAlert(r.status === 'launched' ? 'info' : 'error', r.message || '已启动');
+    // 轮询登录状态
+    let attempts = 0;
+    const check = setInterval(async () => {
+      attempts++;
+      const s = await api('/api/login/status');
+      if (s.loggedIn) {
+        clearInterval(check);
+        btn.textContent = '🔄 重新登录';
+        showAlert('info', '✅ 登录成功！');
+        refresh();
+      } else if (attempts > 120) {
+        clearInterval(check);
+        btn.disabled = false;
+        btn.textContent = '🔑 登录 Lovart';
+        showAlert('error', '登录超时（2 分钟），请重试');
+      }
+    }, 2000);
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = '🔑 登录 Lovart';
+    showAlert('error', '启动浏览器失败: ' + e.message);
+  }
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById('alertBox');
+  el.className = 'alert visible';
+  el.style.background = type === 'error' ? '#331a1f' : '#1a2333';
+  el.style.borderColor = type === 'error' ? '#da3633' : '#58a6ff';
+  el.style.color = type === 'error' ? '#f85149' : '#58a6ff';
+  el.textContent = msg;
+  setTimeout(() => { el.classList.remove('visible'); }, 5000);
+}
+
+refresh();
+refreshTimer = setInterval(refresh, 5000);
+</script>
+</body>
+</html>

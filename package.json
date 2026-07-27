@@ -5,10 +5,13 @@
   "description": "LOVART 慢速自动批量生图 - 通过钉钉表格触发，Playwright 并发生成商品图",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node scripts/launcher.js",
+    "server": "node src/server.js",
     "dev": "node --watch src/server.js",
     "login": "node scripts/manual-login.js",
-    "test:e2e": "node scripts/e2e-test.js"
+    "launch": "node scripts/launcher.js",
+    "test:e2e": "node scripts/e2e-test.js",
+    "build:dist": "node scripts/build-dist.js"
   },
   "engines": {
     "node": ">=18"
