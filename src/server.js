@@ -161,6 +161,10 @@ app.post('/api/tasks/run', authMiddleware, async (req, res) => {
       ? 'dry-run 模式运行中...'
       : (uploadTest ? 'upload 测试模式运行中...' : '正式运行中...');
 
+    // Web UI 触发默认使用可视化模式（同事需要看到浏览器窗口确认运行正常）
+    if (!process.env.CLOAK_HEADLESS) process.env.CLOAK_HEADLESS = 'false';
+    if (!process.env.CLOAK_SLOWMO) process.env.CLOAK_SLOWMO = '200';
+
     // 异步启动任务，不阻塞响应
     const runPromise = runOnce({
       trigger: 'web-ui',
