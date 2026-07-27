@@ -176,8 +176,13 @@ if not exist "%NODE%" (
     exit /b 1
 )
 
-echo [首次运行] 安装浏览器组件（需联网，~150MB）...
-"%NODE%" -e "require('child_process').execSync('\"%NODE%\" node_modules\\npm\\bin\\npx-cli.js playwright install chromium',{stdio:'inherit',cwd:__dirname})" 2>nul
+echo [首次运行] 安装浏览器组件（需联网，~150MB，仅一次）
+"%NODE%" scripts\\setup-browser.js
+if %errorlevel% neq 0 (
+    echo [错误] 浏览器组件安装失败，请检查网络连接
+    pause
+    exit /b 1
+)
 
 :: 启动
 echo [启动] 浏览器将自动打开 http://localhost:3000
