@@ -18,7 +18,8 @@ const auth = require('../src/lovart/auth');
   const { launch } = await import('cloakbrowser');
   const browser = await launch({
     headless: false,
-    humanize: true,
+    humanize: false,
+    slowMo: 0,
   });
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
