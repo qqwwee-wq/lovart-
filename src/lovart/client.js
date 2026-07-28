@@ -881,11 +881,31 @@ async function downloadNewResults(page, log, { rowDir, prevUrls, targetCount = 9
     const ext = (u.match(/\.(png|jpe?g|webp)(\?|$)/i) || [null, 'png'])[1] || 'png';
     const dest = path.join(rowDir, `img${String(i + 1).padStart(2, '0')}.${ext}`);
     try {
+      // 先用 Node.js 直接下载
       await downloadOne(u, dest);
       localFiles.push(dest);
       log.info(`     ↓ img${String(i + 1).padStart(2, '0')} → ${dest}`);
-    } catch (e) {
-      log.warn(`下载 #${i + 1} 失败: ${e.message.slice(0, 80)}`);
+    } catch (e1) {
+      // 直接下载失败（网络限制），改用浏览器 fetch 下载
+      log.info(`     直接下载失败: ${e1.message.slice(0, 40)} → 用浏览器下载...`);
+      try {
+        const b64 = await page.evaluate(async ({ url }) => {
+          const res = await fetch(url, { mode: 'cors', cache: 'force-cache' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const blob = await res.blob();
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }, { url: u });
+        fs.writeFileSync(dest, Buffer.from(b64, 'base64'));
+        localFiles.push(dest);
+        log.info(`     ↓ img${String(i + 1).padStart(2, '0')} → ${dest} (via browser)`);
+      } catch (e2) {
+        log.warn(`下载 #${i + 1} 失败: ${e2.message.slice(0, 80)}`);
+      }
     }
   }
   return localFiles;
