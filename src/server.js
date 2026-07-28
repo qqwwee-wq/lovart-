@@ -122,6 +122,7 @@ app.post('/api/login', async (_req, res) => {
     cwd: path.resolve(__dirname, '..'),
     shell: true,
     stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env }, // 传递 CLOAKBROWSER_CACHE_DIR 等
   });
   child.stderr.on('data', (d) => log.warn('login stderr: ' + d.toString().slice(0, 200)));
   child.stdout.on('data', (d) => log.info('login stdout: ' + d.toString().slice(0, 200)));

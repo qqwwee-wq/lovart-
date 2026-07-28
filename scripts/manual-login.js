@@ -8,16 +8,18 @@
 
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require('playwright');
 const readline = require('readline');
 const config = require('../src/config');
 const auth = require('../src/lovart/auth');
 
+// 用 cloakbrowser（打包内置了隐身 Chromium），不用 playwright.chromium
+
 (async () => {
   console.log('[manual-login] 启动有头浏览器，请手动完成登录...');
-  const browser = await chromium.launch({
+  const { launch } = await import('cloakbrowser');
+  const browser = await launch({
     headless: false,
-    args: ['--disable-blink-features=AutomationControlled'],
+    humanize: true,
   });
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
