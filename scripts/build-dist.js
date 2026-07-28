@@ -137,19 +137,15 @@ if (fs.existsSync(envSrc)) {
   log('⚠️  .env 不存在！');
 }
 
-// 8. 复制 Chromium 浏览器（离线可用）
-const playwrightBrowsers = process.env.PLAYWRIGHT_BROWSERS_PATH
-  || path.join(require('os').homedir(), 'AppData', 'Local', 'ms-playwright');
-if (fs.existsSync(playwrightBrowsers)) {
-  log('复制 Chromium 浏览器...');
-  const browsersDst = path.join(DIST, 'browsers');
-  const chromiumDirs = fs.readdirSync(playwrightBrowsers).filter(d => d.startsWith('chromium-'));
-  for (const d of chromiumDirs) {
-    copyDir(path.join(playwrightBrowsers, d), path.join(browsersDst, d));
-    log(`  ✅ ${d}`);
-  }
+// 8. 复制 CloakBrowser 隐身 Chromium（离线可用）
+const cloakDir = path.join(require('os').homedir(), '.cloakbrowser');
+if (fs.existsSync(cloakDir)) {
+  log('复制 CloakBrowser 隐身 Chromium...');
+  const browsersDst = path.join(DIST, '.cloakbrowser');
+  copyDir(cloakDir, browsersDst);
+  log('  ✅ .cloakbrowser 已打包');
 } else {
-  log('⚠️  Playwright Chromium 未安装（首次运行需联网下载）');
+  log('⚠️  CloakBrowser Chromium 未安装');
 }
 
 // 9. 创建 data/ 目录 + 复制 cookies
