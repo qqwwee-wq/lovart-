@@ -2,6 +2,7 @@
 // 用法: node scripts/launcher.js
 'use strict';
 
+const fs = require('fs');
 const { exec } = require('child_process');
 const path = require('path');
 
