@@ -120,9 +120,8 @@ app.post('/api/login', async (_req, res) => {
   const loginScript = path.resolve(__dirname, '..', 'scripts', 'manual-login.js');
   const child = spawn(process.execPath, [loginScript], {
     cwd: path.resolve(__dirname, '..'),
-    shell: true,
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env }, // 传递 CLOAKBROWSER_CACHE_DIR 等
+    env: { ...process.env },
   });
   child.stderr.on('data', (d) => log.warn('login stderr: ' + d.toString().slice(0, 200)));
   child.stdout.on('data', (d) => log.info('login stdout: ' + d.toString().slice(0, 200)));
