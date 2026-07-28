@@ -143,6 +143,14 @@ if (fs.existsSync(cloakDir)) {
   log('复制 CloakBrowser 隐身 Chromium...');
   const browsersDst = path.join(DIST, '.cloakbrowser');
   copyDir(cloakDir, browsersDst);
+  // 清理下载残留 zip
+  const files = fs.readdirSync(browsersDst);
+  for (const f of files) {
+    if (f.endsWith('.zip')) {
+      fs.unlinkSync(path.join(browsersDst, f));
+      log(`  清理残留: ${f}`);
+    }
+  }
   log('  ✅ .cloakbrowser 已打包');
 } else {
   log('⚠️  CloakBrowser Chromium 未安装');
