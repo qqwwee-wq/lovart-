@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 const config = require('../src/config');
 const auth = require('../src/lovart/auth');
 
@@ -30,18 +29,35 @@ const auth = require('../src/lovart/auth');
   await page.goto(config.lovart.homeUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
   console.log(`[manual-login] 已打开 ${page.url()}`);
-  console.log('[manual-login] 请在打开的浏览器里完成登录（Google / Apple / 邮箱）');
-  console.log('[manual-login] 登录完成后回到这里按回车，cookies 会自动保存');
+  console.log('[manual-login] 请在浏览器中完成登录，系统会自动检测并保存...');
+  console.log('[manual-login] 完成后也可以直接关闭浏览器窗口，自动结束');
 
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  await new Promise((resolve) => rl.question('> 按回车保存 cookies（Ctrl+C 取消）: ', resolve));
-  rl.close();
+  // 自动检测登录：每 3 秒检查是否有 Lovart 认证 cookie
+  let loggedIn = false;
+  const startTime = Date.now();
+  const timeout = 300_000; // 5 分钟超时
+  while (!loggedIn && Date.now() - startTime < timeout) {
+    await new Promise(r => setTimeout(r, 3000));
+    const state = await ctx.storageState();
+    const authCookies = state.cookies.filter(c =>
+      /lovart\.ai$/i.test(c.domain) && /token|auth|session|jwt|access/i.test(c.name)
+    );
+    if (authCookies.length > 0) {
+      auth.save(state);
+      console.log(`[manual-login] ✅ 自动检测到登录完成！`);
+      console.log(`[manual-login] cookies 已保存到 ${auth.cookiesFile()}`);
+      console.log(`[manual-login] cookie 数量: ${state.cookies.length}`);
+      loggedIn = true;
+    }
+  }
 
-  // 拿到当前 storage state（含 cookies）
-  const state = await ctx.storageState();
-  auth.save(state);
-  console.log(`[manual-login] ✅ cookies 已保存到 ${auth.cookiesFile()}`);
-  console.log(`[manual-login] cookie 数量: ${state.cookies.length}`);
+  if (!loggedIn) {
+    // 超时也保存
+    const state = await ctx.storageState();
+    auth.save(state);
+    console.log('[manual-login] ⚠️ 检测超时（5分钟），已保存当前状态');
+  }
+
   console.log('[manual-login] 关闭浏览器...');
   await browser.close();
   process.exit(0);
