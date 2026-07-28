@@ -116,14 +116,15 @@ app.post('/api/login', async (_req, res) => {
   loginInProgress = true;
   loginMessage = '正在启动浏览器...';
 
-  // 在子进程中运行 manual-login.js
+  // 在子进程中运行 manual-login.js（用内置 node.exe）
   const loginScript = path.resolve(__dirname, '..', 'scripts', 'manual-login.js');
-  const child = spawn('node', [loginScript], {
+  const child = spawn(process.execPath, [loginScript], {
     cwd: path.resolve(__dirname, '..'),
-    detached: true,
     shell: true,
-    stdio: 'ignore',
+    stdio: ['ignore', 'pipe', 'pipe'],
   });
+  child.stderr.on('data', (d) => log.warn('login stderr: ' + d.toString().slice(0, 200)));
+  child.stdout.on('data', (d) => log.info('login stdout: ' + d.toString().slice(0, 200)));
 
   child.on('close', (code) => {
     loginInProgress = false;
