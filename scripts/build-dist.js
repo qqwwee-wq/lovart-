@@ -167,32 +167,16 @@ fs.mkdirSync(path.join(DIST, 'logs'), { recursive: true });
 
 // 10. 生成 start.bat
 const bat = `@echo off
-setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
-:: 尝试设置 UTF-8，失败也不影响
-chcp 65001 >nul 2>&1
-
 echo ==========================================
-echo   Lovart Auto Image Generator
+echo   Lovart - Auto Image Generator
 echo ==========================================
 echo.
-
-:: 使用内置便携 Node.js
-set "NODE=%~dp0node\\node.exe"
-if not exist "%NODE%" (
-    echo [ERROR] node.exe not found!
-    echo Please re-extract the zip file.
-    echo Path: %NODE%
-    pause
-    exit /b 1
-)
-
-:: 浏览器已内置，直接启动
-echo Starting...
-echo Control panel: http://localhost:3000
+echo Starting server at http://localhost:3000
 echo.
-"%NODE%" "%~dp0scripts\\launcher.js"
+
+"%~dp0node\\node.exe" "%~dp0scripts\\launcher.js"
 pause
 `;
 
