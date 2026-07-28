@@ -26,30 +26,20 @@ function buildTasks(productRows, fP) {
     const status = (c[fP.status] || '').toString().trim();
     const promptText = (c[fP.prompt] || '').toString().trim();
 
-    // 跳过处理中/已完成（"失败"也重跑，因为可能是上传失败等可恢复错误）
-    if (['处理中', '已完成'].includes(status)) continue;
+    // 只处理状态为空的记录（运营手动清空后触发）
+    if (status !== '') continue;
     if (!styleNo || !modelImage || !modelImage.url) continue;
     if (!promptText) {
       // 提示词为空则跳过
       continue;
     }
 
-    // 出图状态过滤（XzTcnFY / singleSelect）：
-    //   - 「重试」/「待生图」 → 跑
-    //   - 「已确认」/ 其他枚举值 → 跳过
-    //   - 未设（运营没动过） → 视为「待生图」跑一次
+    // 出图状态必须为「待生图」才执行
     if (fP.genStatus) {
       const gs = c[fP.genStatus];
       const gsName = (gs && typeof gs === 'object' ? gs.name : gs);
       const gsStr = String(gsName || '').trim();
-      if (gsStr === '') {
-        // 未设值，默认可执行
-      } else if (gsStr === '重试' || gsStr === '待生图') {
-        // 显式标记为待跑
-      } else {
-        // 已确认 / 其他状态 → 跳过
-        continue;
-      }
+      if (gsStr !== '待生图') continue;
     }
 
     // 每行 = 1 个 task，1 段 prompt，写到「生成结果」字段
