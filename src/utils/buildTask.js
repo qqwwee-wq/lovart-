@@ -26,8 +26,8 @@ function buildTasks(productRows, fP) {
     const status = (c[fP.status] || '').toString().trim();
     const promptText = (c[fP.prompt] || '').toString().trim();
 
-    // 只处理状态为空的记录（运营手动清空后触发）
-    if (status !== '') continue;
+    // 状态必须为空或「失败」才执行（已完成/处理中的跳过）
+    if (status !== '' && status !== '失败') continue;
     if (!styleNo || !modelImage || !modelImage.url) continue;
     if (!promptText) {
       // 提示词为空则跳过
